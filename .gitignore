@@ -5,3 +5,4 @@ CMakeCache.txt
 client/Makefile
 Makefile
 client/client
+server/server

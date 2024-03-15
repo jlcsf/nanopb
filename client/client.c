@@ -63,11 +63,29 @@ int main(int argc, char **argv)
         perror("Connection failed");
     }
 
-    uint8_t request_buffer[REQUEST_BUFFER_SIZE]; 
-    size_t request_length = message_length;
-
-    if (send(client_socket, request_buffer, request_length, 0) == -1) {
+    const char* initial_message = "Connecting to server";
+    if (send(client_socket, initial_message, strlen(initial_message), 0) == -1) {
         perror("Send failed");
+    }
+
+    char response_buffer[REQUEST_BUFFER_SIZE];
+    ssize_t bytes_received = recv(client_socket, response_buffer, sizeof(response_buffer), 0);
+    if (bytes_received == -1) {
+        perror("Receive failed");
+        return 1;
+    } else if (bytes_received == 0) {
+        printf("Connection closed by server\n");
+    } else {
+        response_buffer[bytes_received] = '\0'; 
+        printf("Received response from server: %s\n", response_buffer);
+    }
+
+    // Send the vaccel request object to the server
+    uint8_t request_buffer[REQUEST_BUFFER_SIZE]; 
+    size_t request_length = createSessionRequestStream.bytes_written; // Use the serialized request length
+    if (send(client_socket, createSessionRequestStream, request_length, 0) == -1) {
+        perror("Send failed");
+        return 1;
     }
 
     close(client_socket);

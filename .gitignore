@@ -1,1 +1,7 @@
 nanopb
+CMakeFiles
+*.cmake
+CMakeCache.txt
+client/Makefile
+Makefile
+client/client

@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 
     size_t message_length = createSessionRequestStream.bytes_written;
     request.function_request.arg = &createSessionRequestStream;
-    request.function_request.funcs.encode = (bool (*)(pb_ostream_t *, const pb_field_t *, void * const*)) &pb_encode_string;
+    //request.function_request.funcs.encode = (bool (*)(pb_ostream_t *, const pb_field_t *, void * const*)) &pb_encode_string;
 
 
     /// connect to server
@@ -81,14 +81,23 @@ int main(int argc, char **argv)
     }
 
     // Send the vaccel request object to the server
-    uint8_t request_buffer[REQUEST_BUFFER_SIZE]; 
-    size_t request_length = createSessionRequestStream.bytes_written; // Use the serialized request length
-    if (send(client_socket, createSessionRequestStream, request_length, 0) == -1) {
-        perror("Send failed");
+    uint8_t request_buffer[REQUEST_BUFFER_SIZE];
+    pb_ostream_t request_stream = pb_ostream_from_buffer(request_buffer, sizeof(request_buffer));
+
+    // Encode the VaccelRequest object into the buffer
+    if (!pb_encode(&request_stream, vaccel_VaccelRequest_fields, &request)) {
+        fprintf(stderr, "Encoding failed: %s\n", PB_GET_ERROR(&request_stream));
         return 1;
     }
 
-    close(client_socket);
+    // Calculate the length of the serialized message
+    size_t request_length = request_stream.bytes_written;
+
+    // Send the serialized VaccelRequest to the server
+    if (send(client_socket, request_buffer, request_length, 0) == -1) {
+        perror("Send failed");
+        return 1;
+    }
 
     return 0;
 }

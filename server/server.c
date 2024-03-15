@@ -106,9 +106,25 @@ int main() {
         return 1;
     }
 
-    // Print decoded message
     printf("Decoded message:\n");
     printf("Function Type: %d\n", request.function_type);
+
+    // Access the serialized buffer
+    pb_byte_t *arg_buffer = (pb_byte_t *)request.function_request.arg;
+
+    // Verify if the decoding was successful and bytes_left is correct
+    if (stream.bytes_left == 0 || arg_buffer == NULL) {
+        fprintf(stderr, "Decoded message is empty or invalid\n");
+        close(client_socket);
+        close(server_socket);
+        return 1;
+    }
+
+    // Iterate over the serialized buffer and print each byte
+    printf("Argument bytes:\n");
+    for (size_t i = 0; i < bytes_received; ++i) {
+        printf("Byte %zu: %02x\n", i, buffer[i]);
+    }
 
     // Send response back to client
     const char *response_message_pb = "Server received your protocol buffer message";

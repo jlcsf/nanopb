@@ -23,28 +23,11 @@
 #include "../headers/tensorflow.pb.h"
 #include "../headers/torch.pb.h"
 
-#define PORT 12345
+#define PORT 12346
 #define REQUEST_BUFFER_SIZE 8192
 
 int main(int argc, char **argv)
 {
-    vaccel_VaccelRequest request = vaccel_VaccelRequest_init_zero;
-    request.function_type = vaccel_VaccelFunctionType_CREATE_SESSION;
-
-    vaccel_CreateSessionRequest createSessionRequest = vaccel_CreateSessionRequest_init_zero;
-    createSessionRequest.flags = 0;
-
-    uint8_t createSessionRequestBuffer[vaccel_CreateSessionRequest_size];
-    pb_ostream_t createSessionRequestStream = pb_ostream_from_buffer(createSessionRequestBuffer, sizeof(createSessionRequestBuffer));
-    if (!pb_encode(&createSessionRequestStream, vaccel_CreateSessionRequest_fields, &createSessionRequest)) {
-        fprintf(stderr, "Encoding failed: %s\n", PB_GET_ERROR(&createSessionRequestStream));
-        return 1;
-    }
-
-    size_t message_length = createSessionRequestStream.bytes_written;
-    request.function_request.arg = &createSessionRequestStream;
-    //request.function_request.funcs.encode = (bool (*)(pb_ostream_t *, const pb_field_t *, void * const*)) &pb_encode_string;
-
 
     /// connect to server
 
@@ -68,7 +51,7 @@ int main(int argc, char **argv)
         perror("Send failed");
     }
 
-    char response_buffer[REQUEST_BUFFER_SIZE];
+    char response_buffer[REQUEST_BUFFER_SIZE] = {0};
     ssize_t bytes_received = recv(client_socket, response_buffer, sizeof(response_buffer), 0);
     if (bytes_received == -1) {
         perror("Receive failed");
@@ -79,6 +62,23 @@ int main(int argc, char **argv)
         response_buffer[bytes_received] = '\0'; 
         printf("Received response from server: %s\n", response_buffer);
     }
+
+    vaccel_VaccelRequest request = vaccel_VaccelRequest_init_zero;
+    request.function_type = vaccel_VaccelFunctionType_CREATE_SESSION;
+
+    vaccel_CreateSessionRequest createSessionRequest = vaccel_CreateSessionRequest_init_zero;
+    createSessionRequest.flags = 0;
+
+    uint8_t createSessionRequestBuffer[vaccel_CreateSessionRequest_size];
+    pb_ostream_t createSessionRequestStream = pb_ostream_from_buffer(createSessionRequestBuffer, sizeof(createSessionRequestBuffer));
+    if (!pb_encode(&createSessionRequestStream, vaccel_CreateSessionRequest_fields, &createSessionRequest)) {
+        fprintf(stderr, "Encoding failed: %s\n", PB_GET_ERROR(&createSessionRequestStream));
+        return 1;
+    }
+
+    size_t message_length = createSessionRequestStream.bytes_written;
+    request.function_request.arg = &createSessionRequestStream;
+    //request.function_request.funcs.encode = (bool (*)(pb_ostream_t *, const pb_field_t *, void * const*)) &pb_encode_string;
 
     // Send the vaccel request object to the server
     uint8_t request_buffer[REQUEST_BUFFER_SIZE];
@@ -97,7 +97,51 @@ int main(int argc, char **argv)
     if (send(client_socket, request_buffer, request_length, 0) == -1) {
         perror("Send failed");
         return 1;
+
     }
+
+    printf("Sent bytes to the server\n");
+
+    printf("Recieving bytes from server\n");
+
+    bytes_received = recv(client_socket, response_buffer, sizeof(response_buffer), 0);
+    if (bytes_received == -1) {
+        perror("Receive failed");
+        close(client_socket);
+        return 1;
+    } else if (bytes_received == 0) {
+        printf("Connection closed by server\n");
+        close(client_socket);
+        return 1;
+    } else {
+        response_buffer[bytes_received] = '\0';
+        printf("Received response from server: %s\n", response_buffer);
+    }
+
+    // Decode the response message
+    vaccel_VaccelResponse response = vaccel_VaccelResponse_init_zero;
+    pb_istream_t stream = pb_istream_from_buffer((uint8_t *)response_buffer, bytes_received);
+    if (!pb_decode(&stream, vaccel_VaccelResponse_fields, &response)) {
+        fprintf(stderr, "Decoding failed: %s\n", PB_GET_ERROR(&stream));
+        close(client_socket);
+        return 1;
+    }
+
+    printf("Decoded response message:\n");
+    printf("Function Type: %d\n", response.function_type);
+
+    // Decode the create session response
+    vaccel_CreateSessionResponse createSessionResponse = vaccel_CreateSessionResponse_init_zero;
+    if (!pb_decode(&stream, vaccel_CreateSessionResponse_fields, &createSessionResponse)) {
+        fprintf(stderr, "Decoding failed: %s\n", PB_GET_ERROR(&stream));
+        close(client_socket);
+        return 1;
+    }
+
+    printf("Decoded create session response:\n");
+    printf("Session ID: %d\n", createSessionResponse.session_id);
+
+    close(client_socket);
 
     return 0;
 }

@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <string.h>
 
-#define PORT 12345
+#define PORT 12346
 #define BUFFER_SIZE 8192
 
 #include "../nanopb/pb_encode.h"
@@ -121,20 +121,45 @@ int main() {
     // Print decoded message
     printf("Decoded message:\n");
     printf("Flags: %d\n", createSessionRequest.flags);
-    // Add more printf statements for other fields if necessary
 
 
-    // Send response back to client
-    const char *response_message_pb = "Server received your protocol buffer message";
-    bytes_sent = send(client_socket, response_message_pb, strlen(response_message_pb), 0);
-    if (bytes_sent == -1) {
-        perror("Send failed");
-        close(client_socket);
-        close(server_socket);
+    printf("Response sent to client\n");
+
+    vaccel_VaccelResponse response = vaccel_VaccelResponse_init_zero;
+    response.function_type = vaccel_VaccelFunctionType_CREATE_SESSION;
+
+    vaccel_CreateSessionResponse createSessionResponse = vaccel_CreateSessionResponse_init_zero;
+    createSessionResponse.session_id = 11;
+
+    uint8_t createSessionResponseBuffer[vaccel_CreateSessionResponse_size];
+    pb_ostream_t createSessionResponseStream = pb_ostream_from_buffer(createSessionResponseBuffer, sizeof(createSessionResponseBuffer));
+    if (!pb_encode(&createSessionResponseStream, vaccel_CreateSessionResponse_fields, &createSessionResponse)) {
+        fprintf(stderr, "Encoding failed: %s\n", PB_GET_ERROR(&createSessionResponseStream));
         return 1;
     }
 
-    printf("Response sent to client\n");
+    size_t message_length = createSessionResponseStream.bytes_written;
+    response.function_response.arg = &createSessionResponseStream;
+    //request.function_request.funcs.encode = (bool (*)(pb_ostream_t *, const pb_field_t *, void * const*)) &pb_encode_string;
+
+    // Send the vaccel request object to the server
+    uint8_t response_buffer[BUFFER_SIZE];
+    pb_ostream_t response_stream = pb_ostream_from_buffer(response_buffer, sizeof(response_buffer));
+
+    // Encode the VaccelRequest object into the buffer
+    if (!pb_encode(&response_stream, vaccel_VaccelResponse_fields, &response)) {
+        fprintf(stderr, "Encoding failed: %s\n", PB_GET_ERROR(&response_stream));
+        return 1;
+    }
+
+    // Calculate the length of the serialized message
+    size_t response_length = response_stream.bytes_written;
+
+    // Send the serialized VaccelResponse to the client
+    if (send(client_socket, response_buffer, response_length, 0) == -1) {
+        perror("Send failed");
+        return 1;
+    }
 
     // Close sockets
     close(client_socket);

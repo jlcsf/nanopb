@@ -67,17 +67,17 @@ int main(int argc, char **argv)
     request.function_type = vaccel_VaccelFunctionType_CREATE_SESSION;
 
     vaccel_CreateSessionRequest createSessionRequest = vaccel_CreateSessionRequest_init_zero;
-    createSessionRequest.flags = 0;
+    createSessionRequest.flags = 2;
 
     uint8_t createSessionRequestBuffer[vaccel_CreateSessionRequest_size];
     pb_ostream_t createSessionRequestStream = pb_ostream_from_buffer(createSessionRequestBuffer, sizeof(createSessionRequestBuffer));
-    if (!pb_encode(&createSessionRequestStream, vaccel_CreateSessionRequest_fields, &createSessionRequest)) {
+    if (!pb_encode_submessage(&createSessionRequestStream, vaccel_CreateSessionRequest_fields, &createSessionRequest)) {
         fprintf(stderr, "Encoding failed: %s\n", PB_GET_ERROR(&createSessionRequestStream));
         return 1;
     }
 
-    size_t message_length = createSessionRequestStream.bytes_written;
-    request.function_request.arg = &createSessionRequestStream;
+    request.function_request.arg = createSessionRequestBuffer;
+
     //request.function_request.funcs.encode = (bool (*)(pb_ostream_t *, const pb_field_t *, void * const*)) &pb_encode_string;
 
     // Send the vaccel request object to the server
@@ -100,6 +100,7 @@ int main(int argc, char **argv)
 
     }
 
+
     printf("Sent bytes to the server\n");
 
     printf("Recieving bytes from server\n");
@@ -120,7 +121,7 @@ int main(int argc, char **argv)
 
     // Decode the response message
     vaccel_VaccelResponse response = vaccel_VaccelResponse_init_zero;
-    pb_istream_t stream = pb_istream_from_buffer((uint8_t *)response_buffer, bytes_received);
+    pb_istream_t stream = pb_istream_from_buffer((const pb_byte_t*)response_buffer, bytes_received);
     if (!pb_decode(&stream, vaccel_VaccelResponse_fields, &response)) {
         fprintf(stderr, "Decoding failed: %s\n", PB_GET_ERROR(&stream));
         close(client_socket);

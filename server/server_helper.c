@@ -140,34 +140,8 @@ int main(){
 
     printf("Client connected\n");
 
-    ssize_t bytes_received = recv(client_socket, buffer, BUFFER_SIZE, 0);
-    if (bytes_received == -1) {
-        perror("Receive failed");
-        close(client_socket);
-        close(server_socket);
-        return 1;
-    }
-
-    printf("Received initial message from client: %s\n", buffer);
-
-    // Send response to initial message
-    const char *response_message = "Server received your initial message";
-    ssize_t bytes_sent = send(client_socket, response_message, strlen(response_message), 0);
-    if (bytes_sent == -1) {
-        perror("Send failed");
-        close(client_socket);
-        close(server_socket);
-        return 1;
-    }
-
     // Receive protocol buffer message from client
-    bytes_received = recv(client_socket, buffer, BUFFER_SIZE, 0);
-    if (bytes_received == -1) {
-        perror("Receive failed");
-        close(client_socket);
-        close(server_socket);
-        return 1;
-    }
+    ssize_t bytes_received = recv(client_socket, buffer, BUFFER_SIZE, 0);
 
     vaccel_VaccelRequest request = decode_request(client_socket,server_socket, buffer, bytes_received);
     

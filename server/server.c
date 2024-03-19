@@ -100,7 +100,7 @@ int main() {
     vaccel_VaccelRequest request = vaccel_VaccelRequest_init_zero;
     pb_istream_t stream = pb_istream_from_buffer((uint8_t *)buffer, bytes_received);
     if (!pb_decode(&stream, vaccel_VaccelRequest_fields, &request)) {
-        fprintf(stderr, "Decoding failed: %s\n", PB_GET_ERROR(&stream));
+        fprintf(stderr, "Decoding vaccel_VaccelRequest failed: %s\n", PB_GET_ERROR(&stream));
         close(client_socket);
         close(server_socket);
         return 1;
@@ -109,18 +109,20 @@ int main() {
     printf("Decoded message:\n");
     printf("Function Type: %d\n", request.function_type);
 
-    // Decode the received protocol buffer message into a CreateSessionRequest
+    // Decoding createSessionRequest from request
+    pb_istream_t createSessionStream = pb_istream_from_buffer(buffer, bytes_received);
+    createSessionStream.bytes_left = stream.bytes_left;
+
     vaccel_CreateSessionRequest createSessionRequest = vaccel_CreateSessionRequest_init_zero;
-    if (!pb_decode(&stream, vaccel_CreateSessionRequest_fields, &createSessionRequest)) {
-        fprintf(stderr, "Decoding failed: %s\n", PB_GET_ERROR(&stream));
+    if (!pb_decode(&createSessionStream, vaccel_CreateSessionRequest_fields, &createSessionRequest)) {
+        fprintf(stderr, "Decoding createSessionRequest failed: %s\n", PB_GET_ERROR(&createSessionStream));
         close(client_socket);
         close(server_socket);
         return 1;
     }
 
-    // Print decoded message
-    printf("Decoded message:\n");
-    printf("Flags: %d\n", createSessionRequest.flags);
+    // Comparing flags:
+    printf("Received flag from client: %d\n", createSessionRequest.flags);
 
 
     printf("Response sent to client\n");

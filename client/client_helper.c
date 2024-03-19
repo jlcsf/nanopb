@@ -118,33 +118,14 @@ int main(int argc, char **argv)
         perror("Connection failed");
     }
 
-    const char* initial_message = "Connecting to server";
-    if (send(client_socket, initial_message, strlen(initial_message), 0) == -1) {
-        perror("Send failed");
-    }
-
     char response_buffer[REQUEST_BUFFER_SIZE] = {0};
-    ssize_t bytes_received = recv(client_socket, response_buffer, sizeof(response_buffer), 0);
-    if (bytes_received == -1) {
-        perror("Receive failed");
-        return 1;
-    } else if (bytes_received == 0) {
-        printf("Connection closed by server\n");
-    } else {
-        response_buffer[bytes_received] = '\0'; 
-        printf("Received response from server: %s\n", response_buffer);
-    }
-
-    send_request(client_socket);
-
-    printf("Sent bytes to the server\n");
-
-    bytes_received = recv(client_socket, response_buffer, sizeof(response_buffer), 0);
-    
-    printf("Recieving bytes from server\n");
-
+    ssize_t bytes_received;
     vaccel_VaccelResponse response;
 
+    send_request(client_socket);
+    printf("Sending bytes to the server:\n");
+    bytes_received = recv(client_socket, response_buffer, sizeof(response_buffer), 0);
+    printf("Recieving bytes from server:\n");
     response = decode_response(client_socket, response_buffer, bytes_received);
 
     close(client_socket);

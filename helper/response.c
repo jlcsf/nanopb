@@ -2,6 +2,7 @@
 /// first creates/decodes the protobuf object which is being sent and then seralises the data
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -29,8 +30,10 @@
 #define BUFFER_SIZE 8192
 
 
-int response(int client_socket)
+int main(int argc, char *argv[])
 {
+    int client_socket = atoi(argv[1]);
+
     vaccel_VaccelResponse response = vaccel_VaccelResponse_init_zero;
     response.function_type = vaccel_VaccelFunctionType_CREATE_RESOURCE;
 
@@ -66,8 +69,4 @@ int response(int client_socket)
     }
 
 
-}
-
-int main() {
-    return 0;
 }

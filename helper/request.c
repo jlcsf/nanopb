@@ -2,6 +2,7 @@
 /// first creates/decodes the protobuf object which is being sent and then seralises the data
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -28,8 +29,10 @@
 
 #define BUFFER_SIZE 8192
 
-int request(int client_socket)
+int main(int argc, char *argv[])
 {
+
+    int client_socket = atoi(argv[1]);
     vaccel_VaccelRequest request = vaccel_VaccelRequest_init_zero;
     request.function_type = vaccel_VaccelFunctionType_CREATE_SESSION;
 
@@ -70,8 +73,4 @@ int request(int client_socket)
         perror("Failed to send message");
         return 1;
     }
-}
-
-int main(){
-    return 0;
 }

@@ -43,12 +43,12 @@ typedef struct _vaccel_VaccelEmpty {
 
 typedef struct _vaccel_VaccelRequest {
     vaccel_VaccelFunctionType function_type;
-    pb_callback_t function_request;
+    pb_byte_t function_request[40];
 } vaccel_VaccelRequest;
 
 typedef struct _vaccel_VaccelResponse {
     vaccel_VaccelFunctionType function_type;
-    pb_callback_t function_response;
+    pb_byte_t function_response[40];
 } vaccel_VaccelResponse;
 
 
@@ -69,11 +69,11 @@ extern "C" {
 
 /* Initializer values for message structs */
 #define vaccel_VaccelEmpty_init_default          {0}
-#define vaccel_VaccelRequest_init_default        {_vaccel_VaccelFunctionType_MIN, {{NULL}, NULL}}
-#define vaccel_VaccelResponse_init_default       {_vaccel_VaccelFunctionType_MIN, {{NULL}, NULL}}
+#define vaccel_VaccelRequest_init_default        {_vaccel_VaccelFunctionType_MIN, {0}}
+#define vaccel_VaccelResponse_init_default       {_vaccel_VaccelFunctionType_MIN, {0}}
 #define vaccel_VaccelEmpty_init_zero             {0}
-#define vaccel_VaccelRequest_init_zero           {_vaccel_VaccelFunctionType_MIN, {{NULL}, NULL}}
-#define vaccel_VaccelResponse_init_zero          {_vaccel_VaccelFunctionType_MIN, {{NULL}, NULL}}
+#define vaccel_VaccelRequest_init_zero           {_vaccel_VaccelFunctionType_MIN, {0}}
+#define vaccel_VaccelResponse_init_zero          {_vaccel_VaccelFunctionType_MIN, {0}}
 
 /* Field tags (for use in manual encoding/decoding) */
 #define vaccel_VaccelRequest_function_type_tag   1
@@ -89,14 +89,14 @@ extern "C" {
 
 #define vaccel_VaccelRequest_FIELDLIST(X, a) \
 X(a, STATIC,   SINGULAR, UENUM,    function_type,     1) \
-X(a, CALLBACK, SINGULAR, BYTES,    function_request,   2)
-#define vaccel_VaccelRequest_CALLBACK pb_default_field_callback
+X(a, STATIC,   SINGULAR, FIXED_LENGTH_BYTES, function_request,   2)
+#define vaccel_VaccelRequest_CALLBACK NULL
 #define vaccel_VaccelRequest_DEFAULT NULL
 
 #define vaccel_VaccelResponse_FIELDLIST(X, a) \
 X(a, STATIC,   SINGULAR, UENUM,    function_type,     1) \
-X(a, CALLBACK, SINGULAR, BYTES,    function_response,   2)
-#define vaccel_VaccelResponse_CALLBACK pb_default_field_callback
+X(a, STATIC,   SINGULAR, FIXED_LENGTH_BYTES, function_response,   2)
+#define vaccel_VaccelResponse_CALLBACK NULL
 #define vaccel_VaccelResponse_DEFAULT NULL
 
 extern const pb_msgdesc_t vaccel_VaccelEmpty_msg;
@@ -109,10 +109,10 @@ extern const pb_msgdesc_t vaccel_VaccelResponse_msg;
 #define vaccel_VaccelResponse_fields &vaccel_VaccelResponse_msg
 
 /* Maximum encoded size of messages (where known) */
-/* vaccel_VaccelRequest_size depends on runtime parameters */
-/* vaccel_VaccelResponse_size depends on runtime parameters */
-#define VACCEL_AGENT_PB_H_MAX_SIZE               vaccel_VaccelEmpty_size
+#define VACCEL_AGENT_PB_H_MAX_SIZE               vaccel_VaccelRequest_size
 #define vaccel_VaccelEmpty_size                  0
+#define vaccel_VaccelRequest_size                44
+#define vaccel_VaccelResponse_size               44
 
 #ifdef __cplusplus
 } /* extern "C" */

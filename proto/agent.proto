@@ -83,10 +83,10 @@ enum VaccelFunctionType {
 
 message VaccelRequest {
     VaccelFunctionType function_type = 1;
-    bytes function_request = 2[(nanopb).max_size = 40, (nanopb).fixed_length = true];
+    bytes function_request = 2[(nanopb).max_size = 8, (nanopb).fixed_length = true];
 }
 
 message VaccelResponse {
     VaccelFunctionType function_type = 1;
-    bytes function_response = 2[(nanopb).max_size = 40, (nanopb).fixed_length = true];
+    bytes function_response = 2[(nanopb).max_size = 8, (nanopb).fixed_length = true];
 }

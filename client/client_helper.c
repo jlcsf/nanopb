@@ -74,7 +74,7 @@ void send_request(int client_socket)
     }
 
     size_t message_length = request_buffer_stream.bytes_written;
-    request.function_request.arg = &request_buffer_stream;
+    //request.function_request.arg = &request_buffer_stream;
 
     uint8_t request_buffer_send[BUFFER_SIZE];
     pb_ostream_t request_stream = pb_ostream_from_buffer(request_buffer_send, sizeof(request_buffer_send));

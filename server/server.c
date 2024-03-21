@@ -109,17 +109,30 @@ int main() {
     printf("Decoded message:\n");
     printf("Function Type: %d\n", request.function_type);
 
-    // Decoding createSessionRequest from request
-    pb_istream_t createSessionStream = pb_istream_from_buffer(buffer, bytes_received);
-    createSessionStream.bytes_left = stream.bytes_left;
-
+    // Decode the function request arguments
     vaccel_CreateSessionRequest createSessionRequest = vaccel_CreateSessionRequest_init_zero;
-    if (!pb_decode(&createSessionStream, vaccel_CreateSessionRequest_fields, &createSessionRequest)) {
-        fprintf(stderr, "Decoding createSessionRequest failed: %s\n", PB_GET_ERROR(&createSessionStream));
+    pb_istream_t arg_stream = pb_istream_from_buffer(request.function_request, stream.bytes_left);
+    if (!pb_decode(&arg_stream, vaccel_CreateSessionRequest_fields, &createSessionRequest)) {
+        fprintf(stderr, "Decoding vaccel_CreateSessionRequest failed: %s\n", PB_GET_ERROR(&arg_stream));
         close(client_socket);
         close(server_socket);
         return 1;
     }
+
+    printf("Decoded function request arguments:\n");
+    printf("Flags: %d\n", createSessionRequest.flags);
+        
+    // // Decoding createSessionRequest from request
+    // pb_istream_t createSessionStream = pb_istream_from_buffer(buffer, bytes_received);
+    // createSessionStream.bytes_left = stream.bytes_left;
+
+    // vaccel_CreateSessionRequest createSessionRequest = vaccel_CreateSessionRequest_init_zero;
+    // if (!pb_decode(&createSessionStream, vaccel_CreateSessionRequest_fields, &createSessionRequest)) {
+    //     fprintf(stderr, "Decoding createSessionRequest failed: %s\n", PB_GET_ERROR(&createSessionStream));
+    //     close(client_socket);
+    //     close(server_socket);
+    //     return 1;
+    // }
 
     // Comparing flags:
     printf("Received flag from client: %d\n", createSessionRequest.flags);
@@ -141,7 +154,7 @@ int main() {
     }
 
     size_t message_length = createSessionResponseStream.bytes_written;
-    response.function_response.arg = &createSessionResponseStream;
+    //response.function_response.arg = &createSessionResponseStream;
     //request.function_request.funcs.encode = (bool (*)(pb_ostream_t *, const pb_field_t *, void * const*)) &pb_encode_string;
 
     // Send the vaccel request object to the server

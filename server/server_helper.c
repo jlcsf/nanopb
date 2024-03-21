@@ -71,7 +71,7 @@ void send_response(int client_socket, int server_socket)
     }
 
     size_t message_length = createSessionResponseStream.bytes_written;
-    response.function_response.arg = &createSessionResponseStream;
+    //response.function_response.arg = &createSessionResponseStream;
     //request.function_request.funcs.encode = (bool (*)(pb_ostream_t *, const pb_field_t *, void * const*)) &pb_encode_string;
 
     // Send the vaccel request object to the server

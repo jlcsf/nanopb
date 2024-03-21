@@ -69,18 +69,20 @@ int main(int argc, char **argv)
     vaccel_CreateSessionRequest createSessionRequest = vaccel_CreateSessionRequest_init_zero;
     createSessionRequest.flags = 2;
 
-    uint8_t createSessionRequestBuffer[vaccel_CreateSessionRequest_size];
-    pb_ostream_t createSessionRequestStream = pb_ostream_from_buffer(createSessionRequestBuffer, sizeof(createSessionRequestBuffer));
-    if (!pb_encode_submessage(&createSessionRequestStream, vaccel_CreateSessionRequest_fields, &createSessionRequest)) {
-        fprintf(stderr, "Encoding failed: %s\n", PB_GET_ERROR(&createSessionRequestStream));
+    pb_byte_t func_args[8];
+
+    // Create a stream to write into the buffer
+    pb_ostream_t ostream = pb_ostream_from_buffer(func_args, sizeof(func_args));
+
+    // Encode the createSessionRequest object into the stream
+    if (!pb_encode(&ostream, vaccel_CreateSessionRequest_fields, &createSessionRequest)) {
+        fprintf(stderr, "Encoding failed: %s\n", PB_GET_ERROR(&ostream));
         return 1;
     }
 
-    request.function_request.arg = createSessionRequestBuffer;
+    memcpy(request.function_request, func_args, ostream.bytes_written);
+    printf("%s", request.function_request);
 
-    //request.function_request.funcs.encode = (bool (*)(pb_ostream_t *, const pb_field_t *, void * const*)) &pb_encode_string;
-
-    // Send the vaccel request object to the server
     uint8_t request_buffer[REQUEST_BUFFER_SIZE];
     pb_ostream_t request_stream = pb_ostream_from_buffer(request_buffer, sizeof(request_buffer));
 
@@ -90,8 +92,35 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    // Calculate the length of the serialized message
     size_t request_length = request_stream.bytes_written;
+
+    // Decode the received protocol buffer message
+    // Decode the function request arguments
+    vaccel_CreateSessionRequest new_createSessionRequest = vaccel_CreateSessionRequest_init_zero;
+    pb_istream_t arg_stream = pb_istream_from_buffer(request.function_request, sizeof(request.function_request));
+    if (!pb_decode(&arg_stream, vaccel_CreateSessionRequest_fields, &new_createSessionRequest)) {
+        fprintf(stderr, "Decoding vaccel_CreateSessionRequest failed: %s\n", PB_GET_ERROR(&arg_stream));
+        return 1;
+    }
+
+    // Check if the flags field contains 2
+    if (new_createSessionRequest.flags == 2) {
+        printf("Flag is set to 2\n");
+    } else {
+        printf("Flag is not set to 2\n");
+    }
+
+
+    // Decode the function request arguments
+    vaccel_CreateSessionRequest new_createSessionRequest = vaccel_CreateSessionRequest_init_zero;
+    pb_istream_t arg_stream = pb_istream_from_buffer(new_request.function_request, sizeof(new_request.function_request));
+    if (!pb_decode(&arg_stream, vaccel_CreateSessionRequest_fields, &new_createSessionRequest)) {
+        fprintf(stderr, "Decoding vaccel_CreateSessionRequest failed: %s\n", PB_GET_ERROR(&arg_stream));
+        return 1;
+    }
+
+    printf("Decoded function request arguments:\n");
+    printf("Flags: %d\n", new_createSessionRequest.flags);
 
     // Send the serialized VaccelRequest to the server
     if (send(client_socket, request_buffer, request_length, 0) == -1) {
@@ -99,7 +128,6 @@ int main(int argc, char **argv)
         return 1;
 
     }
-
 
     printf("Sent bytes to the server\n");
 
@@ -121,7 +149,7 @@ int main(int argc, char **argv)
 
     // Decode the response message
     vaccel_VaccelResponse response = vaccel_VaccelResponse_init_zero;
-    pb_istream_t stream = pb_istream_from_buffer((const pb_byte_t*)response_buffer, bytes_received);
+    pb_istream_t new_stream = pb_istream_from_buffer((const pb_byte_t*)response_buffer, bytes_received);
     if (!pb_decode(&stream, vaccel_VaccelResponse_fields, &response)) {
         fprintf(stderr, "Decoding failed: %s\n", PB_GET_ERROR(&stream));
         close(client_socket);

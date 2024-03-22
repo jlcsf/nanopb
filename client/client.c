@@ -26,7 +26,22 @@
 #define PORT 12346
 #define REQUEST_BUFFER_SIZE 8192
 
+vaccel_VaccelRequest create_session_request(int flags)
+{
+    vaccel_VaccelRequest request = vaccel_VaccelRequest_init_zero;
+    request.function_type = 2;
+    request.which_function_args = vaccel_VaccelRequest_CreateSessionRequest_tag;
+    request.function_args.CreateSessionRequest.flags = flags;
+
+    return request;
+}
+
+
 int main() {
+
+    vaccel_VaccelRequest request;
+    pb_byte_t request_buffer[vaccel_VaccelRequest_size];
+    ssize_t bytes_sent;
 
     /// connect to server
 
@@ -45,32 +60,14 @@ int main() {
         perror("Connection failed");
     }
 
-    // Encoding
+    request = create_session_request(1);
 
-    vaccel_VaccelRequest request = vaccel_VaccelRequest_init_zero;
-    request.function_type = 2;
-    request.which_function_args = vaccel_VaccelRequest_CreateSessionRequest_tag;
-    request.function_args.CreateSessionRequest.flags = 3;
-
-
-    pb_byte_t request_buffer[vaccel_VaccelRequest_size];
     pb_ostream_t ostream = pb_ostream_from_buffer(request_buffer, sizeof(request_buffer));
-    bool success_req = pb_encode(&ostream, vaccel_VaccelRequest_fields, &request);
-
-    if (!success_req) {
-        printf("Encoding request failed: %s\n", PB_GET_ERROR(&ostream));
+    if(!pb_encode(&ostream, vaccel_VaccelRequest_fields, &request)){
         return 1;
     }
 
-    ssize_t bytes_sent = send(client_socket, request_buffer, ostream.bytes_written, 0);
-    if (bytes_sent == -1) {
-        perror("Failed to send request to server");
-        return 1;
-    } else {
-        printf("Request sent successfully\n");
-        printf("Sent %zd bytes from client\n", bytes_sent);
-    }
-
+    bytes_sent = send(client_socket, request_buffer, ostream.bytes_written, 0);
 
     close(client_socket);
 

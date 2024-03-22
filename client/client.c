@@ -47,39 +47,21 @@ int main() {
 
     // Encoding
 
-    // Prepare the request
     vaccel_VaccelRequest request = vaccel_VaccelRequest_init_zero;
     request.function_type = 2;
+    request.which_function_args = vaccel_VaccelRequest_CreateSessionRequest_tag;
+    request.function_args.CreateSessionRequest.flags = 3;
 
-    // Set up the create session object with any additional flags
-    vaccel_CreateSessionRequest createSessionRequest = vaccel_CreateSessionRequest_init_zero;
-    createSessionRequest.flags = 50;
-
-    // Encode the create session object
-    pb_byte_t createSessionRequestBuffer[vaccel_CreateSessionRequest_size];
-    pb_ostream_t ostream = pb_ostream_from_buffer(createSessionRequestBuffer, sizeof(createSessionRequestBuffer));
-    bool success = pb_encode(&ostream, vaccel_CreateSessionRequest_fields, &createSessionRequest);
-
-    if (!success) {
-        printf("Encoding failed: %s\n", PB_GET_ERROR(&ostream));
-        return 1;
-    }
-
-
-    // Copy the encoded create session object to the request
-    memcpy(request.function_request, createSessionRequestBuffer, ostream.bytes_written);
-    printf("Size of function_request: %zu\n", sizeof(request.function_request));
 
     pb_byte_t request_buffer[vaccel_VaccelRequest_size];
-    pb_ostream_t n_ostream = pb_ostream_from_buffer(request_buffer, sizeof(request_buffer));
-    success = pb_encode(&n_ostream, vaccel_VaccelRequest_fields, &request);
+    pb_ostream_t ostream = pb_ostream_from_buffer(request_buffer, sizeof(request_buffer));
+    bool success_req = pb_encode(&ostream, vaccel_VaccelRequest_fields, &request);
 
-    if (!success) {
-        printf("Encoding failed: %s\n", PB_GET_ERROR(&ostream));
+    if (!success_req) {
+        printf("Encoding request failed: %s\n", PB_GET_ERROR(&ostream));
         return 1;
     }
 
-    // Send the request to the server   
     ssize_t bytes_sent = send(client_socket, request_buffer, ostream.bytes_written, 0);
     if (bytes_sent == -1) {
         perror("Failed to send request to server");

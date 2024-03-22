@@ -43,12 +43,20 @@ typedef struct _vaccel_VaccelEmpty {
 
 typedef struct _vaccel_VaccelRequest {
     vaccel_VaccelFunctionType function_type;
-    pb_byte_t function_request[64];
+    pb_size_t which_function_args;
+    union {
+        vaccel_CreateSessionRequest CreateSessionRequest;
+        vaccel_UpdateSessionRequest UpdateSessionRequest;
+    } function_args;
 } vaccel_VaccelRequest;
 
 typedef struct _vaccel_VaccelResponse {
     vaccel_VaccelFunctionType function_type;
-    pb_byte_t function_response[64];
+    pb_size_t which_function_args;
+    union {
+        vaccel_CreateSessionResponse CreateSessionResponse;
+        vaccel_VaccelEmpty UpdateSessionRequest;
+    } function_args;
 } vaccel_VaccelResponse;
 
 
@@ -69,17 +77,19 @@ extern "C" {
 
 /* Initializer values for message structs */
 #define vaccel_VaccelEmpty_init_default          {0}
-#define vaccel_VaccelRequest_init_default        {_vaccel_VaccelFunctionType_MIN, {0}}
-#define vaccel_VaccelResponse_init_default       {_vaccel_VaccelFunctionType_MIN, {0}}
+#define vaccel_VaccelRequest_init_default        {_vaccel_VaccelFunctionType_MIN, 0, {vaccel_CreateSessionRequest_init_default}}
+#define vaccel_VaccelResponse_init_default       {_vaccel_VaccelFunctionType_MIN, 0, {vaccel_CreateSessionResponse_init_default}}
 #define vaccel_VaccelEmpty_init_zero             {0}
-#define vaccel_VaccelRequest_init_zero           {_vaccel_VaccelFunctionType_MIN, {0}}
-#define vaccel_VaccelResponse_init_zero          {_vaccel_VaccelFunctionType_MIN, {0}}
+#define vaccel_VaccelRequest_init_zero           {_vaccel_VaccelFunctionType_MIN, 0, {vaccel_CreateSessionRequest_init_zero}}
+#define vaccel_VaccelResponse_init_zero          {_vaccel_VaccelFunctionType_MIN, 0, {vaccel_CreateSessionResponse_init_zero}}
 
 /* Field tags (for use in manual encoding/decoding) */
 #define vaccel_VaccelRequest_function_type_tag   1
-#define vaccel_VaccelRequest_function_request_tag 2
+#define vaccel_VaccelRequest_CreateSessionRequest_tag 2
+#define vaccel_VaccelRequest_UpdateSessionRequest_tag 3
 #define vaccel_VaccelResponse_function_type_tag  1
-#define vaccel_VaccelResponse_function_response_tag 2
+#define vaccel_VaccelResponse_CreateSessionResponse_tag 2
+#define vaccel_VaccelResponse_UpdateSessionRequest_tag 3
 
 /* Struct field encoding specification for nanopb */
 #define vaccel_VaccelEmpty_FIELDLIST(X, a) \
@@ -89,15 +99,21 @@ extern "C" {
 
 #define vaccel_VaccelRequest_FIELDLIST(X, a) \
 X(a, STATIC,   SINGULAR, UENUM,    function_type,     1) \
-X(a, STATIC,   SINGULAR, FIXED_LENGTH_BYTES, function_request,   2)
+X(a, STATIC,   ONEOF,    MESSAGE,  (function_args,CreateSessionRequest,function_args.CreateSessionRequest),   2) \
+X(a, STATIC,   ONEOF,    MESSAGE,  (function_args,UpdateSessionRequest,function_args.UpdateSessionRequest),   3)
 #define vaccel_VaccelRequest_CALLBACK NULL
 #define vaccel_VaccelRequest_DEFAULT NULL
+#define vaccel_VaccelRequest_function_args_CreateSessionRequest_MSGTYPE vaccel_CreateSessionRequest
+#define vaccel_VaccelRequest_function_args_UpdateSessionRequest_MSGTYPE vaccel_UpdateSessionRequest
 
 #define vaccel_VaccelResponse_FIELDLIST(X, a) \
 X(a, STATIC,   SINGULAR, UENUM,    function_type,     1) \
-X(a, STATIC,   SINGULAR, FIXED_LENGTH_BYTES, function_response,   2)
+X(a, STATIC,   ONEOF,    MESSAGE,  (function_args,CreateSessionResponse,function_args.CreateSessionResponse),   2) \
+X(a, STATIC,   ONEOF,    MESSAGE,  (function_args,UpdateSessionRequest,function_args.UpdateSessionRequest),   3)
 #define vaccel_VaccelResponse_CALLBACK NULL
 #define vaccel_VaccelResponse_DEFAULT NULL
+#define vaccel_VaccelResponse_function_args_CreateSessionResponse_MSGTYPE vaccel_CreateSessionResponse
+#define vaccel_VaccelResponse_function_args_UpdateSessionRequest_MSGTYPE vaccel_VaccelEmpty
 
 extern const pb_msgdesc_t vaccel_VaccelEmpty_msg;
 extern const pb_msgdesc_t vaccel_VaccelRequest_msg;
@@ -111,8 +127,8 @@ extern const pb_msgdesc_t vaccel_VaccelResponse_msg;
 /* Maximum encoded size of messages (where known) */
 #define VACCEL_AGENT_PB_H_MAX_SIZE               vaccel_VaccelRequest_size
 #define vaccel_VaccelEmpty_size                  0
-#define vaccel_VaccelRequest_size                68
-#define vaccel_VaccelResponse_size               68
+#define vaccel_VaccelRequest_size                16
+#define vaccel_VaccelResponse_size               10
 
 #ifdef __cplusplus
 } /* extern "C" */

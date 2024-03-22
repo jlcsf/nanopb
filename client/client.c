@@ -29,9 +29,30 @@
 vaccel_VaccelRequest create_session_request(int flags)
 {
     vaccel_VaccelRequest request = vaccel_VaccelRequest_init_zero;
-    request.function_type = 2;
+    request.function_type = vaccel_VaccelRequest_CreateSessionRequest_tag;
     request.which_function_args = vaccel_VaccelRequest_CreateSessionRequest_tag;
     request.function_args.CreateSessionRequest.flags = flags;
+
+    return request;
+}
+
+vaccel_VaccelRequest update_session_request(int session_id, int flags)
+{
+    vaccel_VaccelRequest request = vaccel_VaccelRequest_init_zero;
+    request.function_type = vaccel_VaccelRequest_UpdateSessionRequest_tag;
+    request.which_function_args = vaccel_VaccelRequest_UpdateSessionRequest_tag;
+    request.function_args.UpdateSessionRequest.flags = flags;
+    request.function_args.UpdateSessionRequest.session_id = session_id;
+
+    return request;
+}
+
+vaccel_VaccelRequest delete_session_request(int session_id)
+{
+    vaccel_VaccelRequest request = vaccel_VaccelRequest_init_zero;
+    request.function_type = vaccel_VaccelRequest_DestroySessionRequest_tag;
+    request.which_function_args = vaccel_VaccelRequest_DestroySessionRequest_tag;
+    request.function_args.DestroySessionRequest.session_id = session_id;
 
     return request;
 }
@@ -61,11 +82,9 @@ int main() {
     }
 
     request = create_session_request(1);
-
+    
     pb_ostream_t ostream = pb_ostream_from_buffer(request_buffer, sizeof(request_buffer));
-    if(!pb_encode(&ostream, vaccel_VaccelRequest_fields, &request)){
-        return 1;
-    }
+    pb_encode(&ostream, vaccel_VaccelRequest_fields, &request);
 
     bytes_sent = send(client_socket, request_buffer, ostream.bytes_written, 0);
 

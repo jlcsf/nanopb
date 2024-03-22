@@ -86,6 +86,7 @@ message VaccelRequest {
     oneof function_args{
 		CreateSessionRequest CreateSessionRequest = 2;
 		UpdateSessionRequest UpdateSessionRequest = 3;
+		DestroySessionRequest DestroySessionRequest = 4;
 	}
 }
 
@@ -94,5 +95,6 @@ message VaccelResponse {
 	oneof function_args{
 		CreateSessionResponse CreateSessionResponse = 2;
 		VaccelEmpty UpdateSessionRequest = 3;
+		VaccelEmpty DestroySessionRequest = 4;
 	}
 }

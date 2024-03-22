@@ -43,12 +43,12 @@ typedef struct _vaccel_VaccelEmpty {
 
 typedef struct _vaccel_VaccelRequest {
     vaccel_VaccelFunctionType function_type;
-    pb_byte_t function_request[8];
+    pb_byte_t function_request[64];
 } vaccel_VaccelRequest;
 
 typedef struct _vaccel_VaccelResponse {
     vaccel_VaccelFunctionType function_type;
-    pb_byte_t function_response[8];
+    pb_byte_t function_response[64];
 } vaccel_VaccelResponse;
 
 
@@ -111,8 +111,8 @@ extern const pb_msgdesc_t vaccel_VaccelResponse_msg;
 /* Maximum encoded size of messages (where known) */
 #define VACCEL_AGENT_PB_H_MAX_SIZE               vaccel_VaccelRequest_size
 #define vaccel_VaccelEmpty_size                  0
-#define vaccel_VaccelRequest_size                12
-#define vaccel_VaccelResponse_size               12
+#define vaccel_VaccelRequest_size                68
+#define vaccel_VaccelResponse_size               68
 
 #ifdef __cplusplus
 } /* extern "C" */

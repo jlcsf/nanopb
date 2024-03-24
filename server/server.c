@@ -34,6 +34,9 @@ vaccel_VaccelResponse update_session_response(int dummy);
 vaccel_VaccelResponse destroy_session_response(int dummy);
 void print_vaccel_request(const vaccel_VaccelRequest *request);
 
+void process_request_and_send_response(int client_socket, const uint8_t *request_buffer, size_t request_size);
+vaccel_VaccelResponse generate_response(const vaccel_VaccelRequest *request); 
+
 
 
 int main() {
@@ -54,83 +57,19 @@ int main() {
     vaccel_VaccelResponse response;
     ssize_t bytes_received;
     pb_byte_t response_buffer[BUFFER_SIZE];
+    pb_ostream_t ostream;
 
     // recieved request to create a session 
     bytes_received = receive_request(client_socket, buffer, sizeof(buffer));
-
-    if (!handle_request((uint8_t *)buffer, bytes_received, &request)) {
-        close(client_socket);
-        close(server_socket);
-        return 1;
-    }
-
-    print_vaccel_request(&request);
-
-    
-    if (request.which_function_args == vaccel_VaccelRequest_CreateSessionRequest_tag) {
-        response = create_session_response(1);
-    } else if (request.which_function_args == vaccel_VaccelRequest_UpdateSessionRequest_tag) {
-        response = update_session_response(4);
-    } else if (request.which_function_args == vaccel_VaccelRequest_DestroySessionRequest_tag) {
-        response = destroy_session_response(3);
-    }
-
-    
-    pb_ostream_t ostream = pb_ostream_from_buffer(response_buffer, sizeof(response_buffer));
-    pb_encode(&ostream, vaccel_VaccelResponse_fields, &response);
-    send_response(client_socket, response_buffer, ostream.bytes_written);
+    process_request_and_send_response(client_socket, (const uint8_t *)buffer, bytes_received);
 
     // recieved request to update a session 
     bytes_received = receive_request(client_socket, buffer, sizeof(buffer));
-
-    if (!handle_request((uint8_t *)buffer, bytes_received, &request)) {
-        close(client_socket);
-        close(server_socket);
-        return 1;
-    }
-
-    print_vaccel_request(&request);
-
-    
-    if (request.which_function_args == vaccel_VaccelRequest_CreateSessionRequest_tag) {
-        response = create_session_response(1);
-    } else if (request.which_function_args == vaccel_VaccelRequest_UpdateSessionRequest_tag) {
-        response = update_session_response(4);
-    } else if (request.which_function_args == vaccel_VaccelRequest_DestroySessionRequest_tag) {
-        response = destroy_session_response(3);
-    }
-
-    
-    ostream = pb_ostream_from_buffer(response_buffer, sizeof(response_buffer));
-    pb_encode(&ostream, vaccel_VaccelResponse_fields, &response);
-    send_response(client_socket, response_buffer, ostream.bytes_written);
-
+    process_request_and_send_response(client_socket, (const uint8_t *)buffer, bytes_received);
 
     // recieved request to destroy a session 
     bytes_received = receive_request(client_socket, buffer, sizeof(buffer));
-
-    if (!handle_request((uint8_t *)buffer, bytes_received, &request)) {
-        close(client_socket);
-        close(server_socket);
-        return 1;
-    }
-
-    print_vaccel_request(&request);
-
-    
-    if (request.which_function_args == vaccel_VaccelRequest_CreateSessionRequest_tag) {
-        response = create_session_response(1);
-    } else if (request.which_function_args == vaccel_VaccelRequest_UpdateSessionRequest_tag) {
-        response = update_session_response(4);
-    } else if (request.which_function_args == vaccel_VaccelRequest_DestroySessionRequest_tag) {
-        response = destroy_session_response(3);
-    }
-
-    
-    ostream = pb_ostream_from_buffer(response_buffer, sizeof(response_buffer));
-    pb_encode(&ostream, vaccel_VaccelResponse_fields, &response);
-    send_response(client_socket, response_buffer, ostream.bytes_written);
-
+    process_request_and_send_response(client_socket, (const uint8_t *)buffer, bytes_received);
 
 
     close(client_socket);
@@ -258,5 +197,47 @@ vaccel_VaccelResponse destroy_session_response(int dummy)
     response.function_type = vaccel_VaccelResponse_DestroySessionResponse_tag;
     response.which_function_args = vaccel_VaccelResponse_DestroySessionResponse_tag;
     response.function_args.DestroySessionResponse.success = dummy;
+    return response;
+}
+
+void process_request_and_send_response(int client_socket, const uint8_t *request_buffer, size_t request_size) {
+    vaccel_VaccelRequest request;
+    if (!handle_request(request_buffer, request_size, &request)) {
+        perror("Failed to handle request");
+        return;
+    }
+
+    print_vaccel_request(&request);
+
+    vaccel_VaccelResponse response = generate_response(&request);
+
+    pb_byte_t response_buffer[BUFFER_SIZE];
+    pb_ostream_t ostream = pb_ostream_from_buffer(response_buffer, sizeof(response_buffer));
+    if (!pb_encode(&ostream, vaccel_VaccelResponse_fields, &response)) {
+        perror("Failed to encode response");
+        return;
+    }
+
+    send_response(client_socket, response_buffer, ostream.bytes_written);
+}
+
+vaccel_VaccelResponse generate_response(const vaccel_VaccelRequest *request) {
+    vaccel_VaccelResponse response;
+
+    switch (request->which_function_args) {
+        case vaccel_VaccelRequest_CreateSessionRequest_tag:
+            response = create_session_response(50);
+            break;
+        case vaccel_VaccelRequest_UpdateSessionRequest_tag:
+            response = update_session_response(4);
+            break;
+        case vaccel_VaccelRequest_DestroySessionRequest_tag:
+            response = destroy_session_response(3);
+            break;
+        default:
+            printf("Invalid function type");
+            break;
+    }
+
     return response;
 }

@@ -53,7 +53,7 @@ int main() {
 
 
     // Create and send create session request
-    vaccel_VaccelRequest create_request = create_session_request(1);
+    vaccel_VaccelRequest create_request = create_session_request(20);
     uint8_t request_buffer[vaccel_VaccelRequest_size];
     pb_ostream_t ostream = pb_ostream_from_buffer(request_buffer, sizeof(request_buffer));
     pb_encode(&ostream, vaccel_VaccelRequest_fields, &create_request);
@@ -66,7 +66,7 @@ int main() {
 
 
     // Create and send update session request
-    vaccel_VaccelRequest update_request = update_session_request(1,1);
+    vaccel_VaccelRequest update_request = update_session_request(1,50);
     ostream = pb_ostream_from_buffer(request_buffer, sizeof(request_buffer));
     pb_encode(&ostream, vaccel_VaccelRequest_fields, &update_request);
     send_request(client_socket, request_buffer, ostream.bytes_written);
@@ -76,7 +76,7 @@ int main() {
     handle_response(response_buffer, bytes_received);
 
     // Create and send update session request
-    vaccel_VaccelRequest destory_request = destroy_session_request(1);
+    vaccel_VaccelRequest destory_request = destroy_session_request(60);
     ostream = pb_ostream_from_buffer(request_buffer, sizeof(request_buffer));
     pb_encode(&ostream, vaccel_VaccelRequest_fields, &destory_request);
     send_request(client_socket, request_buffer, ostream.bytes_written);

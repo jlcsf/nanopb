@@ -94,7 +94,7 @@ message VaccelResponse {
     VaccelFunctionType function_type = 1;
 	oneof function_args{
 		CreateSessionResponse CreateSessionResponse = 2;
-		VaccelEmpty UpdateSessionRequest = 3;
-		VaccelEmpty DestroySessionRequest = 4;
+		UpdateSessionResponse UpdateSessionResponse = 3;
+		DestorySessionResponse DestroySessionResponse = 4;
 	}
 }

@@ -32,3 +32,11 @@ message DestroySessionRequest {
 message CreateSessionResponse {
 	uint32 session_id = 1;
 }
+
+message UpdateSessionResponse {
+	uint32 success = 1;
+}
+
+message DestorySessionResponse {
+	uint32 success = 1;
+}

@@ -27,6 +27,14 @@ typedef struct _vaccel_CreateSessionResponse {
     uint32_t session_id;
 } vaccel_CreateSessionResponse;
 
+typedef struct _vaccel_UpdateSessionResponse {
+    uint32_t success;
+} vaccel_UpdateSessionResponse;
+
+typedef struct _vaccel_DestorySessionResponse {
+    uint32_t success;
+} vaccel_DestorySessionResponse;
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,10 +45,14 @@ extern "C" {
 #define vaccel_UpdateSessionRequest_init_default {0, 0}
 #define vaccel_DestroySessionRequest_init_default {0}
 #define vaccel_CreateSessionResponse_init_default {0}
+#define vaccel_UpdateSessionResponse_init_default {0}
+#define vaccel_DestorySessionResponse_init_default {0}
 #define vaccel_CreateSessionRequest_init_zero    {0}
 #define vaccel_UpdateSessionRequest_init_zero    {0, 0}
 #define vaccel_DestroySessionRequest_init_zero   {0}
 #define vaccel_CreateSessionResponse_init_zero   {0}
+#define vaccel_UpdateSessionResponse_init_zero   {0}
+#define vaccel_DestorySessionResponse_init_zero  {0}
 
 /* Field tags (for use in manual encoding/decoding) */
 #define vaccel_CreateSessionRequest_flags_tag    1
@@ -48,6 +60,8 @@ extern "C" {
 #define vaccel_UpdateSessionRequest_flags_tag    2
 #define vaccel_DestroySessionRequest_session_id_tag 1
 #define vaccel_CreateSessionResponse_session_id_tag 1
+#define vaccel_UpdateSessionResponse_success_tag 1
+#define vaccel_DestorySessionResponse_success_tag 1
 
 /* Struct field encoding specification for nanopb */
 #define vaccel_CreateSessionRequest_FIELDLIST(X, a) \
@@ -71,23 +85,39 @@ X(a, STATIC,   SINGULAR, UINT32,   session_id,        1)
 #define vaccel_CreateSessionResponse_CALLBACK NULL
 #define vaccel_CreateSessionResponse_DEFAULT NULL
 
+#define vaccel_UpdateSessionResponse_FIELDLIST(X, a) \
+X(a, STATIC,   SINGULAR, UINT32,   success,           1)
+#define vaccel_UpdateSessionResponse_CALLBACK NULL
+#define vaccel_UpdateSessionResponse_DEFAULT NULL
+
+#define vaccel_DestorySessionResponse_FIELDLIST(X, a) \
+X(a, STATIC,   SINGULAR, UINT32,   success,           1)
+#define vaccel_DestorySessionResponse_CALLBACK NULL
+#define vaccel_DestorySessionResponse_DEFAULT NULL
+
 extern const pb_msgdesc_t vaccel_CreateSessionRequest_msg;
 extern const pb_msgdesc_t vaccel_UpdateSessionRequest_msg;
 extern const pb_msgdesc_t vaccel_DestroySessionRequest_msg;
 extern const pb_msgdesc_t vaccel_CreateSessionResponse_msg;
+extern const pb_msgdesc_t vaccel_UpdateSessionResponse_msg;
+extern const pb_msgdesc_t vaccel_DestorySessionResponse_msg;
 
 /* Defines for backwards compatibility with code written before nanopb-0.4.0 */
 #define vaccel_CreateSessionRequest_fields &vaccel_CreateSessionRequest_msg
 #define vaccel_UpdateSessionRequest_fields &vaccel_UpdateSessionRequest_msg
 #define vaccel_DestroySessionRequest_fields &vaccel_DestroySessionRequest_msg
 #define vaccel_CreateSessionResponse_fields &vaccel_CreateSessionResponse_msg
+#define vaccel_UpdateSessionResponse_fields &vaccel_UpdateSessionResponse_msg
+#define vaccel_DestorySessionResponse_fields &vaccel_DestorySessionResponse_msg
 
 /* Maximum encoded size of messages (where known) */
 #define VACCEL_SESSION_PB_H_MAX_SIZE             vaccel_UpdateSessionRequest_size
 #define vaccel_CreateSessionRequest_size         6
 #define vaccel_CreateSessionResponse_size        6
+#define vaccel_DestorySessionResponse_size       6
 #define vaccel_DestroySessionRequest_size        6
 #define vaccel_UpdateSessionRequest_size         12
+#define vaccel_UpdateSessionResponse_size        6
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -18,4 +18,10 @@ PB_BIND(vaccel_DestroySessionRequest, vaccel_DestroySessionRequest, AUTO)
 PB_BIND(vaccel_CreateSessionResponse, vaccel_CreateSessionResponse, AUTO)
 
 
+PB_BIND(vaccel_UpdateSessionResponse, vaccel_UpdateSessionResponse, AUTO)
+
+
+PB_BIND(vaccel_DestorySessionResponse, vaccel_DestorySessionResponse, AUTO)
+
+
 

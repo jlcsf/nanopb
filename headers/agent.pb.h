@@ -56,8 +56,8 @@ typedef struct _vaccel_VaccelResponse {
     pb_size_t which_function_args;
     union {
         vaccel_CreateSessionResponse CreateSessionResponse;
-        vaccel_VaccelEmpty UpdateSessionRequest;
-        vaccel_VaccelEmpty DestroySessionRequest;
+        vaccel_UpdateSessionResponse UpdateSessionResponse;
+        vaccel_DestorySessionResponse DestroySessionResponse;
     } function_args;
 } vaccel_VaccelResponse;
 
@@ -92,8 +92,8 @@ extern "C" {
 #define vaccel_VaccelRequest_DestroySessionRequest_tag 4
 #define vaccel_VaccelResponse_function_type_tag  1
 #define vaccel_VaccelResponse_CreateSessionResponse_tag 2
-#define vaccel_VaccelResponse_UpdateSessionRequest_tag 3
-#define vaccel_VaccelResponse_DestroySessionRequest_tag 4
+#define vaccel_VaccelResponse_UpdateSessionResponse_tag 3
+#define vaccel_VaccelResponse_DestroySessionResponse_tag 4
 
 /* Struct field encoding specification for nanopb */
 #define vaccel_VaccelEmpty_FIELDLIST(X, a) \
@@ -115,13 +115,13 @@ X(a, STATIC,   ONEOF,    MESSAGE,  (function_args,DestroySessionRequest,function
 #define vaccel_VaccelResponse_FIELDLIST(X, a) \
 X(a, STATIC,   SINGULAR, UENUM,    function_type,     1) \
 X(a, STATIC,   ONEOF,    MESSAGE,  (function_args,CreateSessionResponse,function_args.CreateSessionResponse),   2) \
-X(a, STATIC,   ONEOF,    MESSAGE,  (function_args,UpdateSessionRequest,function_args.UpdateSessionRequest),   3) \
-X(a, STATIC,   ONEOF,    MESSAGE,  (function_args,DestroySessionRequest,function_args.DestroySessionRequest),   4)
+X(a, STATIC,   ONEOF,    MESSAGE,  (function_args,UpdateSessionResponse,function_args.UpdateSessionResponse),   3) \
+X(a, STATIC,   ONEOF,    MESSAGE,  (function_args,DestroySessionResponse,function_args.DestroySessionResponse),   4)
 #define vaccel_VaccelResponse_CALLBACK NULL
 #define vaccel_VaccelResponse_DEFAULT NULL
 #define vaccel_VaccelResponse_function_args_CreateSessionResponse_MSGTYPE vaccel_CreateSessionResponse
-#define vaccel_VaccelResponse_function_args_UpdateSessionRequest_MSGTYPE vaccel_VaccelEmpty
-#define vaccel_VaccelResponse_function_args_DestroySessionRequest_MSGTYPE vaccel_VaccelEmpty
+#define vaccel_VaccelResponse_function_args_UpdateSessionResponse_MSGTYPE vaccel_UpdateSessionResponse
+#define vaccel_VaccelResponse_function_args_DestroySessionResponse_MSGTYPE vaccel_DestorySessionResponse
 
 extern const pb_msgdesc_t vaccel_VaccelEmpty_msg;
 extern const pb_msgdesc_t vaccel_VaccelRequest_msg;

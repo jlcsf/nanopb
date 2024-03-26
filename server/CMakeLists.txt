@@ -17,14 +17,26 @@ target_sources(server_helper PRIVATE
     ../nanopb/pb_common.c
 )
 
-add_executable(server server.c)
 
+
+
+
+
+
+# Add executable and source files
+add_executable(server server.c python_bindings.c)
+
+# Include header files
 file(GLOB HEADER_FILES ../headers/*.h)
 file(GLOB SOURCE_FILES ../headers/*.c)
 target_sources(server PRIVATE ${HEADER_FILES} ${SOURCE_FILES})
 
 # Set include directories
-target_include_directories(server PRIVATE ../headers/ ../nanopb/)
+target_include_directories(server PRIVATE 
+    ../headers/ 
+    ../nanopb/ 
+    /usr/include/python3.11   # Add Python include path here
+)
 
 # Add nanopb library files
 target_sources(server PRIVATE
@@ -32,6 +44,7 @@ target_sources(server PRIVATE
     ../nanopb/pb_decode.c
     ../nanopb/pb_common.c
 )
+
 
 
 

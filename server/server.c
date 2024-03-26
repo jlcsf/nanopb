@@ -8,6 +8,7 @@
 #define BUFFER_SIZE 8192
 
 #include "server.h"
+#include "python_bindings.h"
 
 
 int main() {
@@ -148,7 +149,12 @@ vaccel_VaccelResponse create_session_response(int session_id)
     vaccel_VaccelResponse response = vaccel_VaccelResponse_init_zero;
     response.function_type = vaccel_VaccelResponse_CreateSessionResponse_tag;
     response.which_function_args = vaccel_VaccelResponse_CreateSessionResponse_tag;
-    response.function_args.CreateSessionResponse.session_id = session_id;
+
+    //int output = vaccel_python_create_session(session_id);
+
+    output = create_sess(session_id); // use vaccel...
+
+    response.function_args.CreateSessionResponse.session_id = output;
 
     return response;
 }

@@ -32,3 +32,24 @@ target_sources(server PRIVATE
     ../nanopb/pb_decode.c
     ../nanopb/pb_common.c
 )
+
+
+
+
+
+
+### add shared object for python wrapper using ctypes
+
+add_library(server_shared SHARED 
+    server.c
+    ../nanopb/pb_encode.c
+    ../nanopb/pb_decode.c
+    ../nanopb/pb_common.c
+)
+target_include_directories(server_shared PRIVATE 
+    ../headers/ 
+    ../nanopb/
+)
+target_sources(server_shared PRIVATE ${HEADER_FILES} ${SOURCE_FILES})
+
+target_link_libraries(server PRIVATE server_shared)

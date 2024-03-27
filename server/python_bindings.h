@@ -20,5 +20,7 @@
 #include "../headers/torch.pb.h"
 
 int vaccel_python_create_session(int session_id);
+int create_vaccel_session(struct vaccel_session *sess, int flags);
+int update_vaccel_session(struct vaccel_session *sess, int flags);
 
 #endif /* PYTHON_BINDINGS_H */

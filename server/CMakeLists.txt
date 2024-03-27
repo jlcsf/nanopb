@@ -35,8 +35,10 @@ target_sources(server PRIVATE ${HEADER_FILES} ${SOURCE_FILES})
 target_include_directories(server PRIVATE 
     ../headers/ 
     ../nanopb/ 
-    /usr/include/python3.11   # Add Python include path here
+    /usr/include/python3.11         # Add Python include path here                     
 )
+
+target_link_libraries(server PRIVATE vaccel)
 
 # Add nanopb library files
 target_sources(server PRIVATE

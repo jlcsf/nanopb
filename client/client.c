@@ -36,6 +36,7 @@ void handle_response(const uint8_t *response_buffer, size_t response_size);
 vaccel_VaccelRequest create_session_request(int flags);
 vaccel_VaccelRequest update_session_request(int session_id, int flags);
 vaccel_VaccelRequest destroy_session_request(int session_id);
+vaccel_VaccelResponse return_decoded_response(const uint8_t *response_buffer, size_t response_size);
 
 void print_vaccel_response(const vaccel_VaccelResponse *response);
 bool decode_vaccel_response(const uint8_t *buffer, size_t size, vaccel_VaccelResponse *response);
@@ -53,7 +54,7 @@ int main() {
 
 
     // Create and send create session request
-    vaccel_VaccelRequest create_request = create_session_request(20);
+    vaccel_VaccelRequest create_request = create_session_request(1);
     uint8_t request_buffer[vaccel_VaccelRequest_size];
     pb_ostream_t ostream = pb_ostream_from_buffer(request_buffer, sizeof(request_buffer));
     pb_encode(&ostream, vaccel_VaccelRequest_fields, &create_request);
@@ -64,9 +65,12 @@ int main() {
     ssize_t bytes_received = receive_response(client_socket, response_buffer, sizeof(response_buffer));
     handle_response(response_buffer, bytes_received);
 
+    vaccel_VaccelResponse response = return_decoded_response(response_buffer, bytes_received);
+
+    int session_id = response.function_args.CreateSessionResponse.session_id;
 
     // Create and send update session request
-    vaccel_VaccelRequest update_request = update_session_request(1,50);
+    vaccel_VaccelRequest update_request = update_session_request(session_id,2);
     ostream = pb_ostream_from_buffer(request_buffer, sizeof(request_buffer));
     pb_encode(&ostream, vaccel_VaccelRequest_fields, &update_request);
     send_request(client_socket, request_buffer, ostream.bytes_written);
@@ -76,7 +80,7 @@ int main() {
     handle_response(response_buffer, bytes_received);
 
     // Create and send update session request
-    vaccel_VaccelRequest destory_request = destroy_session_request(60);
+    vaccel_VaccelRequest destory_request = destroy_session_request(session_id);
     ostream = pb_ostream_from_buffer(request_buffer, sizeof(request_buffer));
     pb_encode(&ostream, vaccel_VaccelRequest_fields, &destory_request);
     send_request(client_socket, request_buffer, ostream.bytes_written);
@@ -141,6 +145,15 @@ void handle_response(const uint8_t *response_buffer, size_t response_size) {
 
     print_vaccel_response(&response);
     printf("---------------------------------------------------------------\n");
+}
+
+vaccel_VaccelResponse return_decoded_response(const uint8_t *response_buffer, size_t response_size) {
+    vaccel_VaccelResponse response = vaccel_VaccelResponse_init_zero;
+    if (!decode_vaccel_response(response_buffer, response_size, &response)) {
+        printf("Decoding VaccelRequest failed\n");
+    }
+
+    return response;
 }
 
 

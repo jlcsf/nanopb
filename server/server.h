@@ -1,6 +1,7 @@
 #ifndef SERVER_H
 #define SERVER_H
 
+#include <session.h>
 #include <stdint.h>
 #include <stddef.h>
 
@@ -19,6 +20,8 @@
 #include "../headers/tensorflow.pb.h"
 #include "../headers/torch.pb.h"
 
+#include "vaccel.h"
+
 int setup_server_socket();
 int accept_client_connection(int server_socket);
 ssize_t receive_request(int client_socket, uint8_t *request_buffer, size_t buffer_size);
@@ -26,12 +29,12 @@ bool handle_request(const uint8_t *request_buffer, size_t request_size, vaccel_V
 void send_response(int client_socket, const uint8_t *response_buffer, size_t response_size);
 bool decode_vaccel_request(const uint8_t *buffer, size_t size, vaccel_VaccelRequest *request);
 
-vaccel_VaccelResponse create_session_response(int session_id);
-vaccel_VaccelResponse update_session_response(int dummy);
-vaccel_VaccelResponse destroy_session_response(int dummy);
+vaccel_VaccelResponse create_session_response(struct vaccel_session sess, int flags);
+vaccel_VaccelResponse update_session_response(struct vaccel_session sess, int flags);
+vaccel_VaccelResponse destroy_session_response(struct vaccel_session sess);
 void print_vaccel_request(const vaccel_VaccelRequest *request);
 
-void process_request_and_send_response(int client_socket, const uint8_t *request_buffer, size_t request_size);
-vaccel_VaccelResponse generate_response(const vaccel_VaccelRequest *request); 
+void process_request_and_send_response(int client_socket, const uint8_t *request_buffer, size_t request_size, struct vaccel_session sess);
+vaccel_VaccelResponse generate_response(struct vaccel_session sess, const vaccel_VaccelRequest *request); 
 
 #endif /* SERVER_H */

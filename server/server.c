@@ -1,3 +1,4 @@
+#include <session.h>
 #include <stdio.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -9,6 +10,7 @@
 
 #include "server.h"
 #include "python_bindings.h"
+#include "vaccel.h"
 
 
 int main() {
@@ -31,18 +33,20 @@ int main() {
     pb_byte_t response_buffer[BUFFER_SIZE];
     pb_ostream_t ostream;
 
+    struct vaccel_session sess;
+    printf("---------------------------------------------------------------\n");
     // recieved request to create a session 
     bytes_received = receive_request(client_socket, buffer, sizeof(buffer));
-    process_request_and_send_response(client_socket, (const uint8_t *)buffer, bytes_received);
-
+    process_request_and_send_response(client_socket, (const uint8_t *)buffer, bytes_received, sess);
+    printf("---------------------------------------------------------------\n");
     // recieved request to update a session 
     bytes_received = receive_request(client_socket, buffer, sizeof(buffer));
-    process_request_and_send_response(client_socket, (const uint8_t *)buffer, bytes_received);
-
+    process_request_and_send_response(client_socket, (const uint8_t *)buffer, bytes_received, sess);
+    printf("---------------------------------------------------------------\n");
     // recieved request to destroy a session 
     bytes_received = receive_request(client_socket, buffer, sizeof(buffer));
-    process_request_and_send_response(client_socket, (const uint8_t *)buffer, bytes_received);
-
+    process_request_and_send_response(client_socket, (const uint8_t *)buffer, bytes_received, sess);
+    printf("---------------------------------------------------------------\n");
 
     close(client_socket);
     close(server_socket);
@@ -117,8 +121,6 @@ void send_response(int client_socket, const uint8_t *response_buffer, size_t res
 }
 
 
-
-
 bool decode_vaccel_request(const uint8_t *buffer, size_t size, vaccel_VaccelRequest *request) {
     pb_istream_t istream = pb_istream_from_buffer(buffer, size);
     return pb_decode(&istream, vaccel_VaccelRequest_fields, request);
@@ -144,40 +146,59 @@ void print_vaccel_request(const vaccel_VaccelRequest *request) {
     }
 }
 
-vaccel_VaccelResponse create_session_response(int session_id)
+vaccel_VaccelResponse create_session_response(struct vaccel_session sess ,int flags)
 {
+    
     vaccel_VaccelResponse response = vaccel_VaccelResponse_init_zero;
     response.function_type = vaccel_VaccelResponse_CreateSessionResponse_tag;
     response.which_function_args = vaccel_VaccelResponse_CreateSessionResponse_tag;
 
-    //int output = vaccel_python_create_session(session_id);
+    int output;
 
-    output = create_sess(session_id); // use vaccel...
+    printf("Creating a session with the flags:%u\n" ,flags);
+    printf("Creating a session_id with the id:%u\n" ,sess.session_id);
+
+    //output = vaccel_python_create_session(session_id);
+
+    output = create_vaccel_session(&sess, flags);  // use vaccel...
 
     response.function_args.CreateSessionResponse.session_id = output;
+
+    printf("Output is :%u\n" ,output);
 
     return response;
 }
 
-vaccel_VaccelResponse update_session_response(int dummy)
+vaccel_VaccelResponse update_session_response(struct vaccel_session sess, int flags)
 {
     vaccel_VaccelResponse response = vaccel_VaccelResponse_init_zero;
     response.function_type = vaccel_VaccelResponse_UpdateSessionResponse_tag;
     response.which_function_args = vaccel_VaccelResponse_UpdateSessionResponse_tag;
-    response.function_args.UpdateSessionResponse.success = dummy;
+
+    printf("Updating the session with the flags:%u\n" ,flags);
+
+    int output = update_vaccel_session(&sess, flags);
+
+    response.function_args.UpdateSessionResponse.success = 1;
     return response;
 }
 
-vaccel_VaccelResponse destroy_session_response(int dummy)
-{
+vaccel_VaccelResponse destroy_session_response(struct vaccel_session sess)
+{   
+    int dummy;
     vaccel_VaccelResponse response = vaccel_VaccelResponse_init_zero;
     response.function_type = vaccel_VaccelResponse_DestroySessionResponse_tag;
     response.which_function_args = vaccel_VaccelResponse_DestroySessionResponse_tag;
-    response.function_args.DestroySessionResponse.success = dummy;
+
+    printf("Destroying the session with the session_id:%u\n" ,sess.session_id);
+
+    int output = vaccel_sess_free(&sess);
+
+    response.function_args.DestroySessionResponse.success = 1;
     return response;
 }
 
-void process_request_and_send_response(int client_socket, const uint8_t *request_buffer, size_t request_size) {
+void process_request_and_send_response(int client_socket, const uint8_t *request_buffer, size_t request_size, struct vaccel_session sess) {
     vaccel_VaccelRequest request;
     if (!handle_request(request_buffer, request_size, &request)) {
         perror("Failed to handle request");
@@ -186,7 +207,7 @@ void process_request_and_send_response(int client_socket, const uint8_t *request
 
     print_vaccel_request(&request);
 
-    vaccel_VaccelResponse response = generate_response(&request);
+    vaccel_VaccelResponse response = generate_response(sess, &request);
 
     pb_byte_t response_buffer[BUFFER_SIZE];
     pb_ostream_t ostream = pb_ostream_from_buffer(response_buffer, sizeof(response_buffer));
@@ -198,18 +219,18 @@ void process_request_and_send_response(int client_socket, const uint8_t *request
     send_response(client_socket, response_buffer, ostream.bytes_written);
 }
 
-vaccel_VaccelResponse generate_response(const vaccel_VaccelRequest *request) {
+vaccel_VaccelResponse generate_response(struct vaccel_session sess,const vaccel_VaccelRequest *request) {
     vaccel_VaccelResponse response;
 
     switch (request->which_function_args) {
         case vaccel_VaccelRequest_CreateSessionRequest_tag:
-            response = create_session_response(50);
+            response = create_session_response(sess, request->function_args.CreateSessionRequest.flags);
             break;
         case vaccel_VaccelRequest_UpdateSessionRequest_tag:
-            response = update_session_response(4);
+            response = update_session_response(sess, request->function_args.UpdateSessionRequest.flags);
             break;
         case vaccel_VaccelRequest_DestroySessionRequest_tag:
-            response = destroy_session_response(3);
+            response = destroy_session_response(sess);
             break;
         default:
             printf("Invalid function type");

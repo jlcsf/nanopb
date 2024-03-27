@@ -12,11 +12,11 @@
 /* Struct definitions */
 typedef struct _vaccel_ImageClassificationRequest {
     uint32_t session_id;
-    pb_callback_t image;
+    pb_byte_t image[64];
 } vaccel_ImageClassificationRequest;
 
 typedef struct _vaccel_ImageClassificationResponse {
-    pb_callback_t tags;
+    pb_byte_t tags[64];
 } vaccel_ImageClassificationResponse;
 
 
@@ -25,10 +25,10 @@ extern "C" {
 #endif
 
 /* Initializer values for message structs */
-#define vaccel_ImageClassificationRequest_init_default {0, {{NULL}, NULL}}
-#define vaccel_ImageClassificationResponse_init_default {{{NULL}, NULL}}
-#define vaccel_ImageClassificationRequest_init_zero {0, {{NULL}, NULL}}
-#define vaccel_ImageClassificationResponse_init_zero {{{NULL}, NULL}}
+#define vaccel_ImageClassificationRequest_init_default {0, {0}}
+#define vaccel_ImageClassificationResponse_init_default {{0}}
+#define vaccel_ImageClassificationRequest_init_zero {0, {0}}
+#define vaccel_ImageClassificationResponse_init_zero {{0}}
 
 /* Field tags (for use in manual encoding/decoding) */
 #define vaccel_ImageClassificationRequest_session_id_tag 1
@@ -38,13 +38,13 @@ extern "C" {
 /* Struct field encoding specification for nanopb */
 #define vaccel_ImageClassificationRequest_FIELDLIST(X, a) \
 X(a, STATIC,   SINGULAR, UINT32,   session_id,        1) \
-X(a, CALLBACK, SINGULAR, BYTES,    image,             2)
-#define vaccel_ImageClassificationRequest_CALLBACK pb_default_field_callback
+X(a, STATIC,   SINGULAR, FIXED_LENGTH_BYTES, image,             2)
+#define vaccel_ImageClassificationRequest_CALLBACK NULL
 #define vaccel_ImageClassificationRequest_DEFAULT NULL
 
 #define vaccel_ImageClassificationResponse_FIELDLIST(X, a) \
-X(a, CALLBACK, SINGULAR, BYTES,    tags,              1)
-#define vaccel_ImageClassificationResponse_CALLBACK pb_default_field_callback
+X(a, STATIC,   SINGULAR, FIXED_LENGTH_BYTES, tags,              1)
+#define vaccel_ImageClassificationResponse_CALLBACK NULL
 #define vaccel_ImageClassificationResponse_DEFAULT NULL
 
 extern const pb_msgdesc_t vaccel_ImageClassificationRequest_msg;
@@ -55,8 +55,9 @@ extern const pb_msgdesc_t vaccel_ImageClassificationResponse_msg;
 #define vaccel_ImageClassificationResponse_fields &vaccel_ImageClassificationResponse_msg
 
 /* Maximum encoded size of messages (where known) */
-/* vaccel_ImageClassificationRequest_size depends on runtime parameters */
-/* vaccel_ImageClassificationResponse_size depends on runtime parameters */
+#define VACCEL_IMAGE_PB_H_MAX_SIZE               vaccel_ImageClassificationRequest_size
+#define vaccel_ImageClassificationRequest_size   72
+#define vaccel_ImageClassificationResponse_size  66
 
 #ifdef __cplusplus
 } /* extern "C" */

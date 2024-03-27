@@ -189,6 +189,31 @@ vaccel_VaccelRequest destroy_session_request(int session_id)
     return request;
 }
 
+
+bool image_data_callback(pb_istream_t *stream, const pb_field_t *field, void **arg) {
+    uint8_t *image_data = (uint8_t*)*arg;
+    if (!pb_read(stream, image_data, stream->bytes_left)) {
+        return false;
+    }
+    return true;
+}
+
+vaccel_VaccelRequest image_classification(int session_id, const uint8_t* image_data, size_t image_size) {
+    vaccel_VaccelRequest request = vaccel_VaccelRequest_init_zero;
+    request.function_type = vaccel_VaccelRequest_ImageClassificationRequest_tag;
+    request.which_function_args = vaccel_VaccelRequest_ImageClassificationRequest_tag;
+
+    request.function_args.ImageClassificationRequest.session_id = session_id;
+
+    pb_byte_t image_encoded[64];
+    memset(image_encoded, 0, sizeof(image_encoded));
+    memcpy(image_encoded, image_data, image_size > sizeof(image_encoded) ? sizeof(image_encoded) : image_size);
+
+    memcpy(request.function_args.ImageClassificationRequest.image, image_encoded, sizeof(image_encoded));
+
+    return request;
+}
+
 void print_vaccel_response(const vaccel_VaccelResponse *response) {
     switch (response->which_function_args) {
         case vaccel_VaccelResponse_CreateSessionResponse_tag:

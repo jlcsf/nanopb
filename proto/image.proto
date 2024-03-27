@@ -14,13 +14,15 @@
 
 syntax = "proto3";
 
+
 package vaccel;
+import "nanopb.proto";
 
 message ImageClassificationRequest {
 	uint32 session_id = 1;
-	bytes image = 2;
+	bytes image = 2 [(nanopb).max_size = 64, (nanopb).fixed_length = true];
 }
 
 message ImageClassificationResponse {
-	bytes tags = 1;
+	bytes tags = 1 [(nanopb).max_size = 64, (nanopb).fixed_length = true];
 }

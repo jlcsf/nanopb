@@ -141,20 +141,10 @@ extern const pb_msgdesc_t vaccel_VaccelResponse_msg;
 #define vaccel_VaccelResponse_fields &vaccel_VaccelResponse_msg
 
 /* Maximum encoded size of messages (where known) */
-#if defined(vaccel_ImageClassificationRequest_size)
-union vaccel_VaccelRequest_function_args_size_union {char f5[(6 + vaccel_ImageClassificationRequest_size)]; char f0[14];};
-#endif
-#if defined(vaccel_ImageClassificationResponse_size)
-union vaccel_VaccelResponse_function_args_size_union {char f5[(6 + vaccel_ImageClassificationResponse_size)]; char f0[8];};
-#endif
-#define vaccel_VaccelEmpty_size                  0
-#if defined(vaccel_ImageClassificationRequest_size)
 #define VACCEL_AGENT_PB_H_MAX_SIZE               vaccel_VaccelRequest_size
-#define vaccel_VaccelRequest_size                (2 + sizeof(union vaccel_VaccelRequest_function_args_size_union))
-#endif
-#if defined(vaccel_ImageClassificationResponse_size)
-#define vaccel_VaccelResponse_size               (2 + sizeof(union vaccel_VaccelResponse_function_args_size_union))
-#endif
+#define vaccel_VaccelEmpty_size                  0
+#define vaccel_VaccelRequest_size                76
+#define vaccel_VaccelResponse_size               70
 
 #ifdef __cplusplus
 } /* extern "C" */

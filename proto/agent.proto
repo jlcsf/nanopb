@@ -87,6 +87,7 @@ message VaccelRequest {
 		CreateSessionRequest CreateSessionRequest = 2;
 		UpdateSessionRequest UpdateSessionRequest = 3;
 		DestroySessionRequest DestroySessionRequest = 4;
+		ImageClassificationRequest ImageClassificationRequest = 5;
 	}
 }
 
@@ -96,5 +97,6 @@ message VaccelResponse {
 		CreateSessionResponse CreateSessionResponse = 2;
 		UpdateSessionResponse UpdateSessionResponse = 3;
 		DestorySessionResponse DestroySessionResponse = 4;
+		ImageClassificationResponse ImageClassificationResponse = 5;
 	}
 }

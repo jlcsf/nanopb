@@ -48,6 +48,7 @@ typedef struct _vaccel_VaccelRequest {
         vaccel_CreateSessionRequest CreateSessionRequest;
         vaccel_UpdateSessionRequest UpdateSessionRequest;
         vaccel_DestroySessionRequest DestroySessionRequest;
+        vaccel_ImageClassificationRequest ImageClassificationRequest;
     } function_args;
 } vaccel_VaccelRequest;
 
@@ -58,6 +59,7 @@ typedef struct _vaccel_VaccelResponse {
         vaccel_CreateSessionResponse CreateSessionResponse;
         vaccel_UpdateSessionResponse UpdateSessionResponse;
         vaccel_DestorySessionResponse DestroySessionResponse;
+        vaccel_ImageClassificationResponse ImageClassificationResponse;
     } function_args;
 } vaccel_VaccelResponse;
 
@@ -90,10 +92,12 @@ extern "C" {
 #define vaccel_VaccelRequest_CreateSessionRequest_tag 2
 #define vaccel_VaccelRequest_UpdateSessionRequest_tag 3
 #define vaccel_VaccelRequest_DestroySessionRequest_tag 4
+#define vaccel_VaccelRequest_ImageClassificationRequest_tag 5
 #define vaccel_VaccelResponse_function_type_tag  1
 #define vaccel_VaccelResponse_CreateSessionResponse_tag 2
 #define vaccel_VaccelResponse_UpdateSessionResponse_tag 3
 #define vaccel_VaccelResponse_DestroySessionResponse_tag 4
+#define vaccel_VaccelResponse_ImageClassificationResponse_tag 5
 
 /* Struct field encoding specification for nanopb */
 #define vaccel_VaccelEmpty_FIELDLIST(X, a) \
@@ -105,23 +109,27 @@ extern "C" {
 X(a, STATIC,   SINGULAR, UENUM,    function_type,     1) \
 X(a, STATIC,   ONEOF,    MESSAGE,  (function_args,CreateSessionRequest,function_args.CreateSessionRequest),   2) \
 X(a, STATIC,   ONEOF,    MESSAGE,  (function_args,UpdateSessionRequest,function_args.UpdateSessionRequest),   3) \
-X(a, STATIC,   ONEOF,    MESSAGE,  (function_args,DestroySessionRequest,function_args.DestroySessionRequest),   4)
+X(a, STATIC,   ONEOF,    MESSAGE,  (function_args,DestroySessionRequest,function_args.DestroySessionRequest),   4) \
+X(a, STATIC,   ONEOF,    MESSAGE,  (function_args,ImageClassificationRequest,function_args.ImageClassificationRequest),   5)
 #define vaccel_VaccelRequest_CALLBACK NULL
 #define vaccel_VaccelRequest_DEFAULT NULL
 #define vaccel_VaccelRequest_function_args_CreateSessionRequest_MSGTYPE vaccel_CreateSessionRequest
 #define vaccel_VaccelRequest_function_args_UpdateSessionRequest_MSGTYPE vaccel_UpdateSessionRequest
 #define vaccel_VaccelRequest_function_args_DestroySessionRequest_MSGTYPE vaccel_DestroySessionRequest
+#define vaccel_VaccelRequest_function_args_ImageClassificationRequest_MSGTYPE vaccel_ImageClassificationRequest
 
 #define vaccel_VaccelResponse_FIELDLIST(X, a) \
 X(a, STATIC,   SINGULAR, UENUM,    function_type,     1) \
 X(a, STATIC,   ONEOF,    MESSAGE,  (function_args,CreateSessionResponse,function_args.CreateSessionResponse),   2) \
 X(a, STATIC,   ONEOF,    MESSAGE,  (function_args,UpdateSessionResponse,function_args.UpdateSessionResponse),   3) \
-X(a, STATIC,   ONEOF,    MESSAGE,  (function_args,DestroySessionResponse,function_args.DestroySessionResponse),   4)
+X(a, STATIC,   ONEOF,    MESSAGE,  (function_args,DestroySessionResponse,function_args.DestroySessionResponse),   4) \
+X(a, STATIC,   ONEOF,    MESSAGE,  (function_args,ImageClassificationResponse,function_args.ImageClassificationResponse),   5)
 #define vaccel_VaccelResponse_CALLBACK NULL
 #define vaccel_VaccelResponse_DEFAULT NULL
 #define vaccel_VaccelResponse_function_args_CreateSessionResponse_MSGTYPE vaccel_CreateSessionResponse
 #define vaccel_VaccelResponse_function_args_UpdateSessionResponse_MSGTYPE vaccel_UpdateSessionResponse
 #define vaccel_VaccelResponse_function_args_DestroySessionResponse_MSGTYPE vaccel_DestorySessionResponse
+#define vaccel_VaccelResponse_function_args_ImageClassificationResponse_MSGTYPE vaccel_ImageClassificationResponse
 
 extern const pb_msgdesc_t vaccel_VaccelEmpty_msg;
 extern const pb_msgdesc_t vaccel_VaccelRequest_msg;
@@ -133,10 +141,20 @@ extern const pb_msgdesc_t vaccel_VaccelResponse_msg;
 #define vaccel_VaccelResponse_fields &vaccel_VaccelResponse_msg
 
 /* Maximum encoded size of messages (where known) */
-#define VACCEL_AGENT_PB_H_MAX_SIZE               vaccel_VaccelRequest_size
+#if defined(vaccel_ImageClassificationRequest_size)
+union vaccel_VaccelRequest_function_args_size_union {char f5[(6 + vaccel_ImageClassificationRequest_size)]; char f0[14];};
+#endif
+#if defined(vaccel_ImageClassificationResponse_size)
+union vaccel_VaccelResponse_function_args_size_union {char f5[(6 + vaccel_ImageClassificationResponse_size)]; char f0[8];};
+#endif
 #define vaccel_VaccelEmpty_size                  0
-#define vaccel_VaccelRequest_size                16
-#define vaccel_VaccelResponse_size               10
+#if defined(vaccel_ImageClassificationRequest_size)
+#define VACCEL_AGENT_PB_H_MAX_SIZE               vaccel_VaccelRequest_size
+#define vaccel_VaccelRequest_size                (2 + sizeof(union vaccel_VaccelRequest_function_args_size_union))
+#endif
+#if defined(vaccel_ImageClassificationResponse_size)
+#define vaccel_VaccelResponse_size               (2 + sizeof(union vaccel_VaccelResponse_function_args_size_union))
+#endif
 
 #ifdef __cplusplus
 } /* extern "C" */

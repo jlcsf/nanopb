@@ -190,26 +190,58 @@ vaccel_VaccelRequest destroy_session_request(int session_id)
 }
 
 
-bool image_data_callback(pb_istream_t *stream, const pb_field_t *field, void **arg) {
-    uint8_t *image_data = (uint8_t*)*arg;
-    if (!pb_read(stream, image_data, stream->bytes_left)) {
-        return false;
+// Function to read an image file and return its byte data
+uint8_t* read_image_data(const char* image_path, size_t* image_size) {
+    FILE* file = fopen(image_path, "rb");
+    if (!file) {
+        fprintf(stderr, "Error opening image file: %s\n", image_path);
+        return NULL;
     }
-    return true;
+
+    fseek(file, 0, SEEK_END);
+    long file_size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    uint8_t* buffer = (uint8_t*)malloc(file_size);
+    if (!buffer) {
+        fclose(file);
+        fprintf(stderr, "Error allocating memory for image data\n");
+        return NULL;
+    }
+
+    size_t bytes_read = fread(buffer, 1, file_size, file);
+    fclose(file);
+
+    if (bytes_read != file_size) {
+        free(buffer);
+        fprintf(stderr, "Error reading image data from file\n");
+        return NULL;
+    }
+
+    *image_size = (size_t)file_size;
+    return buffer;
 }
 
-vaccel_VaccelRequest image_classification(int session_id, const uint8_t* image_data, size_t image_size) {
+vaccel_VaccelRequest image_classification(int session_id, const char* image_path) {
+    size_t image_size;
+    uint8_t* image_data = read_image_data(image_path, &image_size);
+    if (!image_data) {
+        fprintf(stderr, "Error reading image data\n");
+    }
+
+
     vaccel_VaccelRequest request = vaccel_VaccelRequest_init_zero;
     request.function_type = vaccel_VaccelRequest_ImageClassificationRequest_tag;
     request.which_function_args = vaccel_VaccelRequest_ImageClassificationRequest_tag;
 
     request.function_args.ImageClassificationRequest.session_id = session_id;
 
-    pb_byte_t image_encoded[64];
-    memset(image_encoded, 0, sizeof(image_encoded));
-    memcpy(image_encoded, image_data, image_size > sizeof(image_encoded) ? sizeof(image_encoded) : image_size);
+    size_t copy_size = image_size > sizeof(request.function_args.ImageClassificationRequest.image) ?
+                       sizeof(request.function_args.ImageClassificationRequest.image) :
+                       image_size;
+    memcpy(request.function_args.ImageClassificationRequest.image, image_data, copy_size);
 
-    memcpy(request.function_args.ImageClassificationRequest.image, image_encoded, sizeof(image_encoded));
+    free(image_data);
 
     return request;
 }
@@ -225,6 +257,9 @@ void print_vaccel_response(const vaccel_VaccelResponse *response) {
             break;
         case vaccel_VaccelResponse_DestroySessionResponse_tag:
             printf("Destroyed Session flags\n");
+            break;
+        case vaccel_VaccelResponse_ImageClassificationResponse_tag:
+            printf("Image classification complete");
             break;
         default:
             printf("Invalid function type\n");

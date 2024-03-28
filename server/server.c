@@ -43,6 +43,10 @@ int main() {
     bytes_received = receive_request(client_socket, buffer, sizeof(buffer));
     process_request_and_send_response(client_socket, (const uint8_t *)buffer, bytes_received, sess);
     printf("---------------------------------------------------------------\n");
+    // recieved request to classify an image
+    bytes_received = receive_request(client_socket, buffer, sizeof(buffer));
+    process_request_and_send_response(client_socket, (const uint8_t *)buffer, bytes_received, sess);
+    printf("---------------------------------------------------------------\n");
     // recieved request to destroy a session 
     bytes_received = receive_request(client_socket, buffer, sizeof(buffer));
     process_request_and_send_response(client_socket, (const uint8_t *)buffer, bytes_received, sess);
@@ -141,6 +145,9 @@ void print_vaccel_request(const vaccel_VaccelRequest *request) {
             printf("Function Arguments (DestroySessionRequest):\n");
             printf("SessionID: %u\n", request->function_args.DestroySessionRequest.session_id);
             break;
+        case vaccel_VaccelRequest_ImageClassificationRequest_tag:
+            printf("Function arguments (Image Classification):\n");
+            printf("size of image recieved(bytes):  %lu\n", sizeof(request->function_args.ImageClassificationRequest.image));
         default:
             printf("Invalid function type\n");
     }
@@ -192,12 +199,31 @@ vaccel_VaccelResponse destroy_session_response(struct vaccel_session sess)
 
     printf("Destroying the session with the session_id:%u\n" ,sess.session_id);
 
-    int output = vaccel_sess_free(&sess);
+    int output = vaccel_sess_free(&sess); // TODO:
 
     response.function_args.DestroySessionResponse.success = 1;
     return response;
 }
 
+vaccel_VaccelResponse image_classification_response(struct vaccel_session sess, pb_byte_t image)
+{   
+    vaccel_VaccelResponse response;
+    response.function_type = vaccel_VaccelResponse_ImageClassificationResponse_tag;
+    response.which_function_args = vaccel_VaccelResponse_ImageClassificationResponse_tag;
+
+    printf("Image classification on the image received:\n");
+
+    response = image_classify(&sess, image, response);
+
+    // Decode and print the tags
+    // char decode_into_here[512];
+    // pb_istream_t stream_decoded = pb_istream_from_buffer((pb_byte_t*)response.function_args.ImageClassificationResponse.tags,
+    //                                                     sizeof(response.function_args.ImageClassificationResponse.tags));
+    // pb_read(&stream_decoded, (pb_byte_t*)decode_into_here, stream_decoded.bytes_left);
+    // printf("Decoded Classification tags: %s\n", decode_into_here);
+
+    return response;
+}
 void process_request_and_send_response(int client_socket, const uint8_t *request_buffer, size_t request_size, struct vaccel_session sess) {
     vaccel_VaccelRequest request;
     if (!handle_request(request_buffer, request_size, &request)) {
@@ -231,6 +257,9 @@ vaccel_VaccelResponse generate_response(struct vaccel_session sess,const vaccel_
             break;
         case vaccel_VaccelRequest_DestroySessionRequest_tag:
             response = destroy_session_response(sess);
+            break;
+        case vaccel_VaccelRequest_ImageClassificationRequest_tag:
+            response = image_classification_response(sess, *(request->function_args.ImageClassificationRequest.image));
             break;
         default:
             printf("Invalid function type");

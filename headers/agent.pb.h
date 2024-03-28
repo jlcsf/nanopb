@@ -143,8 +143,8 @@ extern const pb_msgdesc_t vaccel_VaccelResponse_msg;
 /* Maximum encoded size of messages (where known) */
 #define VACCEL_AGENT_PB_H_MAX_SIZE               vaccel_VaccelRequest_size
 #define vaccel_VaccelEmpty_size                  0
-#define vaccel_VaccelRequest_size                76
-#define vaccel_VaccelResponse_size               70
+#define vaccel_VaccelRequest_size                526
+#define vaccel_VaccelResponse_size               519
 
 #ifdef __cplusplus
 } /* extern "C" */

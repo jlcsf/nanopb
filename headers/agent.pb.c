@@ -9,10 +9,10 @@
 PB_BIND(vaccel_VaccelEmpty, vaccel_VaccelEmpty, AUTO)
 
 
-PB_BIND(vaccel_VaccelRequest, vaccel_VaccelRequest, AUTO)
+PB_BIND(vaccel_VaccelRequest, vaccel_VaccelRequest, 2)
 
 
-PB_BIND(vaccel_VaccelResponse, vaccel_VaccelResponse, AUTO)
+PB_BIND(vaccel_VaccelResponse, vaccel_VaccelResponse, 2)
 
 
 

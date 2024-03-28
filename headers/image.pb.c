@@ -6,10 +6,10 @@
 #error Regenerate this file with the current version of nanopb generator.
 #endif
 
-PB_BIND(vaccel_ImageClassificationRequest, vaccel_ImageClassificationRequest, AUTO)
+PB_BIND(vaccel_ImageClassificationRequest, vaccel_ImageClassificationRequest, 2)
 
 
-PB_BIND(vaccel_ImageClassificationResponse, vaccel_ImageClassificationResponse, AUTO)
+PB_BIND(vaccel_ImageClassificationResponse, vaccel_ImageClassificationResponse, 2)
 
 
 

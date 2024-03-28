@@ -23,4 +23,5 @@ int vaccel_python_create_session(int session_id);
 int create_vaccel_session(struct vaccel_session *sess, int flags);
 int update_vaccel_session(struct vaccel_session *sess, int flags);
 
+vaccel_VaccelResponse image_classify(struct vaccel_session *sess, pb_byte_t image, vaccel_VaccelResponse response);
 #endif /* PYTHON_BINDINGS_H */

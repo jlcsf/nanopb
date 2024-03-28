@@ -12,11 +12,11 @@
 /* Struct definitions */
 typedef struct _vaccel_ImageClassificationRequest {
     uint32_t session_id;
-    pb_byte_t image[64];
+    pb_byte_t image[512];
 } vaccel_ImageClassificationRequest;
 
 typedef struct _vaccel_ImageClassificationResponse {
-    pb_byte_t tags[64];
+    char tags[512];
 } vaccel_ImageClassificationResponse;
 
 
@@ -26,9 +26,9 @@ extern "C" {
 
 /* Initializer values for message structs */
 #define vaccel_ImageClassificationRequest_init_default {0, {0}}
-#define vaccel_ImageClassificationResponse_init_default {{0}}
+#define vaccel_ImageClassificationResponse_init_default {""}
 #define vaccel_ImageClassificationRequest_init_zero {0, {0}}
-#define vaccel_ImageClassificationResponse_init_zero {{0}}
+#define vaccel_ImageClassificationResponse_init_zero {""}
 
 /* Field tags (for use in manual encoding/decoding) */
 #define vaccel_ImageClassificationRequest_session_id_tag 1
@@ -43,7 +43,7 @@ X(a, STATIC,   SINGULAR, FIXED_LENGTH_BYTES, image,             2)
 #define vaccel_ImageClassificationRequest_DEFAULT NULL
 
 #define vaccel_ImageClassificationResponse_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, FIXED_LENGTH_BYTES, tags,              1)
+X(a, STATIC,   SINGULAR, STRING,   tags,              1)
 #define vaccel_ImageClassificationResponse_CALLBACK NULL
 #define vaccel_ImageClassificationResponse_DEFAULT NULL
 
@@ -56,8 +56,8 @@ extern const pb_msgdesc_t vaccel_ImageClassificationResponse_msg;
 
 /* Maximum encoded size of messages (where known) */
 #define VACCEL_IMAGE_PB_H_MAX_SIZE               vaccel_ImageClassificationRequest_size
-#define vaccel_ImageClassificationRequest_size   72
-#define vaccel_ImageClassificationResponse_size  66
+#define vaccel_ImageClassificationRequest_size   521
+#define vaccel_ImageClassificationResponse_size  514
 
 #ifdef __cplusplus
 } /* extern "C" */

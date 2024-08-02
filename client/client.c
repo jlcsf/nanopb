@@ -81,7 +81,7 @@ int main() {
     handle_response(response_buffer, bytes_received);
 
     // Create and send image classification request
-    const char *image_path = "example.jpg";
+    const char *image_path = "/usr/local/share/images/example.jpg";
     vaccel_VaccelRequest image_request = image_classification(session_id, image_path);
     ostream = pb_ostream_from_buffer(request_buffer, sizeof(request_buffer));
     pb_encode(&ostream, vaccel_VaccelRequest_fields, &image_request);

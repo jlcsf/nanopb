@@ -21,7 +21,7 @@
 #include "../headers/torch.pb.h"
 
 #include "vaccel.h"
-
+#include "responses.h"
 int setup_server_socket();
 int accept_client_connection(int server_socket);
 ssize_t receive_request(int client_socket, uint8_t *request_buffer, size_t buffer_size);

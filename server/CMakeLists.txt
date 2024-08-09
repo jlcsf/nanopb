@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(ProjectName C)
+project(nanopb_vaccel_server C)
 
 # Function to add common sources and include directories
 function(add_common_sources target)
@@ -31,10 +31,6 @@ add_custom_target(generate_headers ALL
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 
-# Server helper executable
-add_executable(server_helper "${CMAKE_SOURCE_DIR}/server/server_helper.c")
-add_common_sources(server_helper)
-add_dependencies(server_helper generate_headers)
 
 # Server executable
 add_executable(server "${CMAKE_SOURCE_DIR}/server/server.c" "${CMAKE_SOURCE_DIR}/server/python_bindings.c")

@@ -131,7 +131,7 @@ bool decode_vaccel_request(const uint8_t *buffer, size_t size, vaccel_VaccelRequ
 }
 
 void print_vaccel_request(const vaccel_VaccelRequest *request) {
-    switch (request->which_function_args) {
+    switch (request->function_type) {
         case vaccel_VaccelRequest_CreateSessionRequest_tag:
             printf("Function Arguments (CreateSessionRequest):\n");
             printf("Flags: %u\n", request->function_args.CreateSessionRequest.flags);
@@ -153,77 +153,7 @@ void print_vaccel_request(const vaccel_VaccelRequest *request) {
     }
 }
 
-vaccel_VaccelResponse create_session_response(struct vaccel_session sess ,int flags)
-{
-    
-    vaccel_VaccelResponse response = vaccel_VaccelResponse_init_zero;
-    response.function_type = vaccel_VaccelResponse_CreateSessionResponse_tag;
-    response.which_function_args = vaccel_VaccelResponse_CreateSessionResponse_tag;
 
-    int output;
-
-    printf("Creating a session with the flags:%u\n" ,flags);
-    printf("Creating a session_id with the id:%u\n" ,sess.session_id);
-
-    //output = vaccel_python_create_session(session_id);
-
-    output = create_vaccel_session(&sess, flags);  // use vaccel...
-
-    response.function_args.CreateSessionResponse.session_id = output;
-
-    printf("Output is :%u\n" ,output);
-
-    return response;
-}
-
-vaccel_VaccelResponse update_session_response(struct vaccel_session sess, int flags)
-{
-    vaccel_VaccelResponse response = vaccel_VaccelResponse_init_zero;
-    response.function_type = vaccel_VaccelResponse_UpdateSessionResponse_tag;
-    response.which_function_args = vaccel_VaccelResponse_UpdateSessionResponse_tag;
-
-    printf("Updating the session with the flags:%u\n" ,flags);
-
-    int output = update_vaccel_session(&sess, flags);
-
-    response.function_args.UpdateSessionResponse.success = 1;
-    return response;
-}
-
-vaccel_VaccelResponse destroy_session_response(struct vaccel_session sess)
-{   
-    int dummy;
-    vaccel_VaccelResponse response = vaccel_VaccelResponse_init_zero;
-    response.function_type = vaccel_VaccelResponse_DestroySessionResponse_tag;
-    response.which_function_args = vaccel_VaccelResponse_DestroySessionResponse_tag;
-
-    printf("Destroying the session with the session_id:%u\n" ,sess.session_id);
-
-    int output = vaccel_sess_free(&sess); // TODO:
-
-    response.function_args.DestroySessionResponse.success = 1;
-    return response;
-}
-
-vaccel_VaccelResponse image_classification_response(struct vaccel_session sess, pb_byte_t image)
-{   
-    vaccel_VaccelResponse response;
-    response.function_type = vaccel_VaccelResponse_ImageClassificationResponse_tag;
-    response.which_function_args = vaccel_VaccelResponse_ImageClassificationResponse_tag;
-
-    printf("Image classification on the image received:\n");
-
-    response = image_classify(&sess, image, response);
-
-    // Decode and print the tags
-    // char decode_into_here[512];
-    // pb_istream_t stream_decoded = pb_istream_from_buffer((pb_byte_t*)response.function_args.ImageClassificationResponse.tags,
-    //                                                     sizeof(response.function_args.ImageClassificationResponse.tags));
-    // pb_read(&stream_decoded, (pb_byte_t*)decode_into_here, stream_decoded.bytes_left);
-    // printf("Decoded Classification tags: %s\n", decode_into_here);
-
-    return response;
-}
 void process_request_and_send_response(int client_socket, const uint8_t *request_buffer, size_t request_size, struct vaccel_session sess) {
     vaccel_VaccelRequest request;
     if (!handle_request(request_buffer, request_size, &request)) {
@@ -248,7 +178,7 @@ void process_request_and_send_response(int client_socket, const uint8_t *request
 vaccel_VaccelResponse generate_response(struct vaccel_session sess,const vaccel_VaccelRequest *request) {
     vaccel_VaccelResponse response;
 
-    switch (request->which_function_args) {
+    switch (request->function_type) {
         case vaccel_VaccelRequest_CreateSessionRequest_tag:
             response = create_session_response(sess, request->function_args.CreateSessionRequest.flags);
             break;
